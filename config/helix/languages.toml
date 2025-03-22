@@ -1,0 +1,19 @@
+[language-server]
+typos-lsp = { command = "typos-lsp"}
+
+[[language]]
+name = "toml"
+language-servers = [ "taplo", "typos-lsp" ]
+
+[[language]]
+name = "typst"
+language-servers = [ "typst-lsp", "typos-lsp"]
+
+[[language]]
+name = "rust"
+language-servers = [ "rust-analyzer", "typos-lsp"]
+
+[[language]]
+name = "markdown"
+language-servers = [ "marksman", "typos-lsp"]
+
