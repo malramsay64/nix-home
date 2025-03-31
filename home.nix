@@ -22,6 +22,13 @@
     # # "Hello, world!" when run.
     # pkgs.hello    
     pkgs.iosevka
+    pkgs.bottom
+    pkgs.uv
+    pkgs.just
+    pkgs.duckdb
+    pkgs.zellij
+
+    pkgs.awscli2
 
     # # It is sometimes useful to fine-tune packages, for example, by applying
     # # overrides. You can do that directly here, just don't forget the
@@ -49,6 +56,7 @@
     ".config/alacritty/one_dark.toml".source = config/alacritty/one_dark.toml;
     ".config/helix/config.toml".source = config/helix/config.toml;
     ".config/helix/languages.toml".source = config/helix/languages.toml;
+    ".config/zellij/config.kdl".source = config/zellij/config.kdl;
 
     # # You can also set the file content immediately.
     # ".gradle/gradle.properties".text = ''
@@ -74,6 +82,7 @@
   #  /etc/profiles/per-user/malcolm/etc/profile.d/hm-session-vars.sh
   #
   home.sessionVariables = {
+    COLORTERM = "truecolor";
   };
 
   # Let Home Manager install and manage itself.
@@ -100,6 +109,8 @@
     git = {
       enable = true;
       delta.enable = true;
+      userEmail = "malcolm.ramsay@tiimely.com";
+      userName = "Malcolm Ramsay";
       aliases = {
       	lol = "log --graph --decorate --pretty=oneline --abbrev-commit";
       	lola = "log --graph --decorate --pretty=oneline --abbrev-commit --all";
@@ -132,20 +143,34 @@
         pkgs.dockerfile-language-server-nodejs
         pkgs.terraform-ls
         pkgs.marksman
-        pkgs.ruff
         pkgs.tinymist
         pkgs.yaml-language-server
         pkgs.rust-analyzer
         pkgs.typos-lsp
+        pkgs.python313Packages.pylsp-mypy
+        pkgs.python313Packages.python-lsp-server
+        pkgs.ruff
       ];
     };
-    jujutsu.enable = true;
+    jujutsu = {
+      enable = true;
+      settings = {
+        user = {
+          name = "Malcolm Ramsay";
+          email = "malcolm.ramsay@tiimely.com";
+        };
+      };
+    };
     ripgrep.enable = true;
     starship = {
       enable = true;
       enableFishIntegration = true;
     };
-    zellij.enable = true;
+    # zellij = {
+    #   enable = true;
+    #   enableFishIntegration = false;
+    #   enableBashIntegration = false;
+    # };
     zoxide.enable = true;
     
   };
