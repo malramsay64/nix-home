@@ -83,6 +83,7 @@
   #
   home.sessionVariables = {
     COLORTERM = "truecolor";
+    BROWSER = "wslview";
   };
 
   # Let Home Manager install and manage itself.
