@@ -1,5 +1,4 @@
 { config, pkgs, ... }:
-
 {
   # Home Manager needs a bit of information about you and the paths it should
   # manage.
@@ -148,6 +147,7 @@
         pkgs.yaml-language-server
         pkgs.rust-analyzer
         pkgs.typos-lsp
+        pkgs.basedpyright
         pkgs.python313Packages.pylsp-mypy
         pkgs.python313Packages.python-lsp-server
         pkgs.ruff
