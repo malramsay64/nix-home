@@ -103,7 +103,7 @@
     fish = {
       enable = true;
       generateCompletions = true;
-      
+      interactiveShellInit =  "COMPLETE=fish jj | source" ;
     };
     gh.enable = true;
     git = {
@@ -111,6 +111,7 @@
       delta.enable = true;
       userEmail = "malcolm.ramsay@tiimely.com";
       userName = "Malcolm Ramsay";
+      extraConfig = {push = {autoSetupRemote = true;};};
       aliases = {
       	lol = "log --graph --decorate --pretty=oneline --abbrev-commit";
       	lola = "log --graph --decorate --pretty=oneline --abbrev-commit --all";
@@ -142,6 +143,7 @@
         pkgs.docker-compose-language-service
         pkgs.dockerfile-language-server-nodejs
         pkgs.terraform-ls
+        pkgs.taplo
         pkgs.marksman
         pkgs.tinymist
         pkgs.yaml-language-server
