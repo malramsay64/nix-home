@@ -29,7 +29,7 @@
             username = "malcolm";
             name = "Malcolm Ramsay";
             home = "/home/malcolm";
-            email = "malcolm.ramsay@tiimely.com";
+            email = "m@malramsay.com";
           };
         };
       };
@@ -47,7 +47,7 @@
             username = "malcolm";
             name = "Malcolm Ramsay";
             home = "/home/malcolm";
-            email = "m@malramsay.com";
+            email = "malcolm.ramsay@tiimely.com";
           };
         };
       };
