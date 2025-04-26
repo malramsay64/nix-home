@@ -1,9 +1,9 @@
-{ config, pkgs, ... }:
+{ config, pkgs, user, ... }:
 {
   # Home Manager needs a bit of information about you and the paths it should
   # manage.
-  home.username = "malcolm";
-  home.homeDirectory = "/home/malcolm";
+  home.username = user.username;
+  home.homeDirectory = user.home;
 
   # This value determines the Home Manager release that your configuration is
   # compatible with. This helps avoid breakage when a new Home Manager release
@@ -109,8 +109,8 @@
     git = {
       enable = true;
       delta.enable = true;
-      userEmail = "malcolm.ramsay@tiimely.com";
-      userName = "Malcolm Ramsay";
+      userEmail = user.email;
+      userName = user.name;
       extraConfig = {push = {autoSetupRemote = true;};};
       aliases = {
       	lol = "log --graph --decorate --pretty=oneline --abbrev-commit";
@@ -159,8 +159,8 @@
       enable = true;
       settings = {
         user = {
-          name = "Malcolm Ramsay";
-          email = "malcolm.ramsay@tiimely.com";
+          name = user.name;
+          email = user.email;
         };
       };
     };
@@ -174,7 +174,6 @@
     #   enableFishIntegration = false;
     #   enableBashIntegration = false;
     # };
-    zoxide.enable = true;
-    
+    zoxide.enable = true;    
   };
 }
