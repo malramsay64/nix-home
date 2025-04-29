@@ -26,7 +26,8 @@
     pkgs.just
     pkgs.duckdb
     pkgs.zellij
-
+    pkgs.tree
+    
     pkgs.awscli2
 
     # # It is sometimes useful to fine-tune packages, for example, by applying
@@ -98,6 +99,11 @@
     bat.enable = true;
     direnv = {
       enable = true;
+      config = {
+        global = {
+          skip_dotenv = false;
+        };
+      };
     };
     fd.enable = true;
     fish = {
