@@ -1,30 +1,48 @@
 [language-server]
-typos-lsp = { command = "typos-lsp"}
+typos-lsp = { command = "typos-lsp" }
+sqlmesh-lsp = { command = "sqlmesh_lsp" }
+sqls = { command = "sqls" }
 
 [language-server.basedpyright]
 command = "basedpyright-langserver"
 args = ["--stdio"]
-
 [language-server.basedpyright.config]
 basedpyright.analysis.diagnosticMode = "openFilesOnly"
 
 [[language]]
 name = "toml"
-language-servers = [ "taplo", "typos-lsp" ]
+auto-format = true
+formatter = { command = "taplo", args = ["format", "-"] }
+language-servers = ["taplo", "typos-lsp"]
+
+[[language]]
+name = "yaml"
+formatter = { command = 'prettier', args = ["--parser", "yaml"] }
+auto-format = true
 
 [[language]]
 name = "typst"
-language-servers = [ "typst-lsp", "typos-lsp"]
-
-[[language]]
-name = "rust"
-language-servers = [ "rust-analyzer", "typos-lsp"]
+auto-format = true
+formatter = { command = "typstfmt", args = ["--output", "-"] }
+language-servers = ["typst-lsp", "typos-lsp"]
 
 [[language]]
 name = "markdown"
-language-servers = [ "marksman", "typos-lsp"]
+language-servers = ["marksman", "typos-lsp"]
+
+[[language]]
+name = "rust"
+auto-format = true
+language-servers = ["rust-analyzer", "typos-lsp"]
+
+[[language]]
+name = "sql"
+auto-format = true
+formatter = { command = "sqlmesh", args = ["format", "-"] }
+language-servers = ["sqlmesh-lsp", "sqls"]
 
 [[language]]
 name = "python"
+auto-format = true
+formatter = { command = "ruff", args = ["format", "-"] }
 language-servers = ["basedpyright", "ruff", "pylsp"]
-

@@ -164,6 +164,8 @@
         pkgs.python313Packages.pylsp-mypy
         pkgs.python313Packages.python-lsp-server
         pkgs.ruff
+        pkgs.prettierd
+        pkgs.sqls
       ];
     };
     jujutsu = {
