@@ -2,6 +2,7 @@
 typos-lsp = { command = "typos-lsp" }
 sqlmesh-lsp = { command = "sqlmesh_lsp" }
 sqls = { command = "sqls" }
+tinymist = { command = "tinymist" }
 
 [language-server.basedpyright]
 command = "basedpyright-langserver"
@@ -23,8 +24,8 @@ auto-format = true
 [[language]]
 name = "typst"
 auto-format = true
-formatter = { command = "typstfmt", args = ["--output", "-"] }
-language-servers = ["typst-lsp", "typos-lsp"]
+# formatter = { command = "typstfmt", args = ["--output", "-"] }
+language-servers = ["tinymist", "typos-lsp"]
 
 [[language]]
 name = "markdown"
@@ -37,7 +38,7 @@ language-servers = ["rust-analyzer", "typos-lsp"]
 
 [[language]]
 name = "sql"
-auto-format = true
+auto-format = false
 formatter = { command = "sqlmesh", args = ["format", "-"] }
 language-servers = ["sqlmesh-lsp", "sqls"]
 

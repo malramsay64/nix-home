@@ -27,7 +27,10 @@
     pkgs.duckdb
     pkgs.zellij
     pkgs.tree
+    pkgs.typst
     
+    pkgs.hyperfine
+    pkgs.jq
     pkgs.awscli2
 
     # # It is sometimes useful to fine-tune packages, for example, by applying
@@ -165,7 +168,9 @@
         pkgs.python313Packages.python-lsp-server
         pkgs.ruff
         pkgs.prettierd
+        pkgs.omnisharp-roslyn
         pkgs.sqls
+        pkgs.tinymist
       ];
     };
     jujutsu = {
