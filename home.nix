@@ -21,16 +21,18 @@
     # # "Hello, world!" when run.
     # pkgs.hello    
     pkgs.iosevka
-    pkgs.bottom
     pkgs.uv
-    pkgs.just
     pkgs.duckdb
     pkgs.zellij
-    pkgs.tree
     pkgs.typst
-    
+
+    pkgs.tree
+    pkgs.just
+    pkgs.bottom
+    pkgs.dust
     pkgs.hyperfine
     pkgs.jq
+
     pkgs.awscli2
 
     # # It is sometimes useful to fine-tune packages, for example, by applying
