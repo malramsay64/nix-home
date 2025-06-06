@@ -89,6 +89,10 @@
     BROWSER = "wslview";
   };
 
+  home.sessionPath = [
+    "$HOME/.local/bin"
+  ];
+
   # Let Home Manager install and manage itself.
   programs = {
     home-manager.enable = true;
@@ -171,6 +175,7 @@
         pkgs.omnisharp-roslyn
         pkgs.sqls
         pkgs.tinymist
+        pkgs.lsp-ai
       ];
     };
     jujutsu = {

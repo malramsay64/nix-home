@@ -3,6 +3,7 @@ typos-lsp = { command = "typos-lsp" }
 sqlmesh-lsp = { command = "sqlmesh_lsp" }
 sqls = { command = "sqls" }
 tinymist = { command = "tinymist" }
+ty = { command = "ty" }
 
 [language-server.basedpyright]
 command = "basedpyright-langserver"
@@ -45,5 +46,5 @@ language-servers = ["sqlmesh-lsp", "sqls"]
 [[language]]
 name = "python"
 auto-format = true
-formatter = { command = "ruff", args = ["format", "-"] }
-language-servers = ["basedpyright", "ruff", "pylsp"]
+# formatter = { command = "ruff", args = ["format", "-"] }
+language-servers = ["basedpyright", "ty", "ruff", "pylsp"]
