@@ -32,6 +32,7 @@
     pkgs.dust
     pkgs.hyperfine
     pkgs.jq
+    pkgs.difftastic
 
     pkgs.awscli2
 
@@ -175,6 +176,7 @@
         pkgs.ruff
         pkgs.prettierd
         pkgs.omnisharp-roslyn
+        pkgs.prettier
         pkgs.sqls
         pkgs.tinymist
         pkgs.lsp-ai

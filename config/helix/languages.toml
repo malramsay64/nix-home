@@ -23,6 +23,10 @@ formatter = { command = 'prettier', args = ["--parser", "yaml"] }
 auto-format = true
 
 [[language]]
+name = "json"
+formatter = { command = 'prettier', args = ["--parser", "json"] }
+
+[[language]]
 name = "typst"
 auto-format = true
 # formatter = { command = "typstfmt", args = ["--output", "-"] }
