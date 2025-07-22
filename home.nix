@@ -33,6 +33,7 @@
     pkgs.hyperfine
     pkgs.jq
     pkgs.difftastic
+    pkgs.terraform
 
     pkgs.awscli2
 

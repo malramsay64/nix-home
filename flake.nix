@@ -13,11 +13,15 @@
   outputs = { nixpkgs, home-manager, ... }:
     let
       system = "x86_64-linux";
-      pkgs = nixpkgs.legacyPackages.${system};
+      pkgs = import nixpkgs {
+          system = system;
+          config = {
+            allowUnfree = true;
+          };
+        };
     in {
       homeConfigurations."home" = home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
-
         # Specify your home configuration modules here, for example,
         # the path to your home.nix.
         modules = [ ./home.nix ];
