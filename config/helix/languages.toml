@@ -1,9 +1,10 @@
 [language-server]
 typos-lsp = { command = "typos-lsp" }
 sqlmesh-lsp = { command = "sqlmesh_lsp" }
-sqls = { command = "sqls" }
-tinymist = { command = "tinymist" }
-ty = { command = "ty" }
+pyrefly = { command = "pyrefly", args = ["lsp"] }
+# sqls = { command = "sqls" }
+# tinymist = { command = "tinymist" }
+# ty = { command = "ty" }
 
 [language-server.basedpyright]
 command = "basedpyright-langserver"
@@ -45,10 +46,10 @@ language-servers = ["rust-analyzer", "typos-lsp"]
 name = "sql"
 auto-format = false
 formatter = { command = "sqlmesh", args = ["format", "-"] }
-language-servers = ["sqlmesh-lsp", "sqls"]
+language-servers = ["sqlmesh-lsp"]
 
 [[language]]
 name = "python"
 auto-format = true
 # formatter = { command = "ruff", args = ["format", "-"] }
-language-servers = ["ty", "ruff", "pylsp"]
+language-servers = ["pyrefly", "ty", "ruff", "pylsp", "typos-lsp"]

@@ -1,0 +1,47 @@
+layout {
+    default_tab_template {
+        pane size=1 borderless=true {
+            plugin location="zellij:tab-bar"
+        }
+        children
+        pane size=2 borderless=true {
+            plugin location="zellij:status-bar"
+        }
+    }
+	tab name="airflow" split_direction="horizontal" cwd="~/projects/analytics-core/airflow" {
+		pane size="70%"
+		pane size="30%"
+	}
+	tab name="transformation" split_direction="horizontal" cwd="~/projects/analytics-core/transformation" {
+		pane size="70%"
+		pane size="30%"		
+	}
+	tab name="warehouse-schema" split_direction="horizontal" cwd="~/projects/analytics-core/warehouse/Warehouse Schema/setup" {
+		pane size="70%"
+		pane size="30%"
+	}
+	tab name="notes" cwd="~/projects/tiimely-notes" {
+		pane
+	}
+	tab name="nix-home" cwd="~/projects/nix-home" {
+		pane size="70%"
+		pane
+	}
+	tab name="tf-service-test" split_direction="horizontal" cwd="~/projects/tf-service/environments/analytics_test" {
+		pane size="70%"
+		pane size="30%" split_direction="vertical" {
+			pane 
+			pane cwd="../analytics_test_iam"
+		}
+	}
+	tab name="tf-service-prod" split_direction="horizontal" cwd="~/projects/tf-service/environments/analytics_prod" {
+		pane size="70%"
+		pane size="30%" split_direction="vertical" {
+			pane 
+			pane cwd="../analytics_prod_iam" 
+		}
+	}
+	tab name="btm" {
+		pane command="btm"
+	}
+ }

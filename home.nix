@@ -1,4 +1,10 @@
-{ config, pkgs, user, ... }:
+{
+  config,
+  pkgs,
+  user,
+  pkgs-stable,
+  ...
+}:
 {
   # Home Manager needs a bit of information about you and the paths it should
   # manage.
@@ -19,12 +25,13 @@
   home.packages = [
     # # Adds the 'hello' command to your environment. It prints a friendly
     # # "Hello, world!" when run.
-    # pkgs.hello    
+    # pkgs.hello
     pkgs.iosevka
     pkgs.uv
     pkgs.duckdb
     pkgs.zellij
     pkgs.typst
+    pkgs.lazyjj
 
     pkgs.tree
     pkgs.just
@@ -32,10 +39,13 @@
     pkgs.dust
     pkgs.hyperfine
     pkgs.jq
+    pkgs.pqrs
     pkgs.difftastic
     pkgs.terraform
+    pkgs.nixfmt-rfc-style
+    pkgs.mermaid-cli
 
-    pkgs.awscli2
+    # pkgs-stable.awscli2
 
     # # It is sometimes useful to fine-tune packages, for example, by applying
     # # overrides. You can do that directly here, just don't forget the
@@ -107,6 +117,9 @@
     alacritty = {
       enable = true;
     };
+    awscli = {
+      enable = true;
+    };
     bat.enable = true;
     direnv = {
       enable = true;
@@ -120,25 +133,33 @@
     fish = {
       enable = true;
       generateCompletions = true;
-      interactiveShellInit =  "COMPLETE=fish jj | source" ;
+      interactiveShellInit = "COMPLETE=fish jj | source";
     };
     gh.enable = true;
+    delta = {
+      enable = true;
+      enableGitIntegration = true;
+    };
     git = {
       enable = true;
-      delta.enable = true;
-      userEmail = user.email;
-      userName = user.name;
-      extraConfig = {push = {autoSetupRemote = true;};};
-      aliases = {
-      	lol = "log --graph --decorate --pretty=oneline --abbrev-commit";
-      	lola = "log --graph --decorate --pretty=oneline --abbrev-commit --all";
-      	ci = "commit";
-      	co = "checkout";
-      	st = "status";
-      	br = "branch";
-      	re = "remote";
-      	sw = "switch";
-      	gca = "gc --aggressive --prune=now";
+      settings = {
+        user.email = user.email;
+        user.name = user.name;
+        delta.enable = true;
+        aliases = {
+          lol = "log --graph --decorate --pretty=oneline --abbrev-commit";
+          lola = "log --graph --decorate --pretty=oneline --abbrev-commit --all";
+          ci = "commit";
+          co = "checkout";
+          st = "status";
+          br = "branch";
+          re = "remote";
+          sw = "switch";
+          gca = "gc --aggressive --prune=now";
+        };
+        push = {
+          autoSetupRemote = true;
+        };
       };
     };
     gitui = {
@@ -163,11 +184,13 @@
       extraPackages = [
         pkgs.bash-language-server
         pkgs.docker-compose-language-service
-        pkgs.dockerfile-language-server-nodejs
+        pkgs.dockerfile-language-server
+        pkgs.nixd
         pkgs.terraform-ls
         pkgs.taplo
         pkgs.marksman
         pkgs.tinymist
+        pkgs.shellcheck
         pkgs.yaml-language-server
         pkgs.rust-analyzer
         pkgs.typos-lsp
@@ -177,8 +200,7 @@
         pkgs.ruff
         pkgs.prettierd
         pkgs.omnisharp-roslyn
-        pkgs.prettier
-        pkgs.sqls
+        # pkgs.sqls
         pkgs.tinymist
         pkgs.lsp-ai
       ];
@@ -192,16 +214,18 @@
         };
       };
     };
+
     ripgrep.enable = true;
     starship = {
       enable = true;
       enableFishIntegration = true;
     };
-    # zellij = {
-    #   enable = true;
-    #   enableFishIntegration = false;
-    #   enableBashIntegration = false;
-    # };
-    zoxide.enable = true;    
+    uv.enable = true;
+    zellij = {
+      enable = true;
+      enableFishIntegration = false;
+      enableBashIntegration = false;
+    };
+    zoxide.enable = true;
   };
 }
