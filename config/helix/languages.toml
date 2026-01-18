@@ -2,9 +2,11 @@
 typos-lsp = { command = "typos-lsp" }
 sqlmesh-lsp = { command = "sqlmesh_lsp" }
 pyrefly = { command = "pyrefly", args = ["lsp"] }
+dbt-language-server = { command = "dbt-language-server" }
 # sqls = { command = "sqls" }
 # tinymist = { command = "tinymist" }
 # ty = { command = "ty" }
+
 
 [language-server.basedpyright]
 command = "basedpyright-langserver"
@@ -49,7 +51,13 @@ formatter = { command = "sqlmesh", args = ["format", "-"] }
 language-servers = ["sqlmesh-lsp"]
 
 [[language]]
+name = "dbt"
+scope = "dbt_project.yml"
+file-types = ["sql", "yml", "yaml"]
+language-servers = ["dbt-language-server"]
+
+[[language]]
 name = "python"
 auto-format = true
 # formatter = { command = "ruff", args = ["format", "-"] }
-language-servers = ["pyrefly", "ty", "ruff", "pylsp", "typos-lsp"]
+language-servers = ["ty", "ruff", "pyrefly", "pylsp", "typos-lsp"]

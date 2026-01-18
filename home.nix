@@ -45,6 +45,24 @@
     pkgs.nixfmt-rfc-style
     pkgs.mermaid-cli
 
+    (pkgs.stdenv.mkDerivation rec {
+      pname = "dbt-language-server";
+      version = "0.4.0";
+
+      src = pkgs.fetchurl {
+        url = "https://github.com/j-clemons/dbt-language-server/releases/download/v${version}/dbt-language-server-linux-amd64";
+        hash = "sha256-rva2tes1Pf1oK86SN72yYOxMMEgyd/W/4IdbeREoaFE=";
+      };
+
+      dontUnpack = true; # Skip unpacking since it's just a binary
+
+      installPhase = ''
+        mkdir -p $out/bin
+        cp $src $out/bin/${pname}
+        chmod +x $out/bin/${pname}
+      '';
+    })
+
     # pkgs-stable.awscli2
 
     # # It is sometimes useful to fine-tune packages, for example, by applying
@@ -202,7 +220,8 @@
         pkgs.omnisharp-roslyn
         # pkgs.sqls
         pkgs.tinymist
-        pkgs.lsp-ai
+        # pkgs.lsp-ai
+        pkgs.ty
       ];
     };
     jujutsu = {
