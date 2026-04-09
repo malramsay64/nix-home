@@ -42,8 +42,12 @@
     pkgs.pqrs
     pkgs.difftastic
     pkgs.terraform
-    pkgs.nixfmt-rfc-style
+    pkgs.nixfmt
     pkgs.mermaid-cli
+    pkgs.prettier
+    pkgs.prettier-plugin-jinja-template
+    pkgs.jjui
+    pkgs.jiratui
 
     (pkgs.stdenv.mkDerivation rec {
       pname = "dbt-language-server";
@@ -218,7 +222,7 @@
         pkgs.ruff
         pkgs.prettierd
         pkgs.omnisharp-roslyn
-        # pkgs.sqls
+        pkgs.sqls
         pkgs.tinymist
         # pkgs.lsp-ai
         pkgs.ty

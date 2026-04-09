@@ -12,7 +12,7 @@ layout {
 		pane size="70%"
 		pane size="30%"
 	}
-	tab name="transformation" split_direction="horizontal" cwd="~/projects/analytics-core/transformation" {
+	tab name="transformation" split_direction="horizontal" cwd="~/projects/analytics-core/dbt" {
 		pane size="70%"
 		pane size="30%"		
 	}
