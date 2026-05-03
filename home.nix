@@ -49,6 +49,9 @@
     pkgs.jjui
     pkgs.jiratui
 
+    pkgs.github-copilot-cli
+    pkgs.claude-code
+    
     (pkgs.stdenv.mkDerivation rec {
       pname = "dbt-language-server";
       version = "0.4.0";
@@ -164,6 +167,7 @@
     };
     git = {
       enable = true;
+      signing.format = null;
       settings = {
         user.email = user.email;
         user.name = user.name;

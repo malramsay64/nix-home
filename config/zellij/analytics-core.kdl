@@ -8,17 +8,16 @@ layout {
             plugin location="zellij:status-bar"
         }
     }
-	tab name="airflow" split_direction="horizontal" cwd="~/projects/analytics-core/airflow" {
+	tab name="Models" split_direction="horizontal" cwd="~/projects/analytics-core/ml-models" {
 		pane size="70%"
 		pane size="30%"
 	}
-	tab name="transformation" split_direction="horizontal" cwd="~/projects/analytics-core/dbt" {
+	tab name="Model-API" split_direction="horizontal" cwd="~/projects/analytics-core/model-api" {
 		pane size="70%"
 		pane size="30%"		
 	}
-	tab name="warehouse-schema" split_direction="horizontal" cwd="~/projects/analytics-core/warehouse/Warehouse Schema/setup" {
-		pane size="70%"
-		pane size="30%"
+	tab name="JJ" split_direction="horizontal" cwd="~/projects/analytics-core/" {
+		pane
 	}
 	tab name="notes" cwd="~/projects/tiimely-notes" {
 		pane
@@ -26,20 +25,6 @@ layout {
 	tab name="nix-home" cwd="~/projects/nix-home" {
 		pane size="70%"
 		pane
-	}
-	tab name="tf-service-test" split_direction="horizontal" cwd="~/projects/tf-service/environments/analytics_test" {
-		pane size="70%"
-		pane size="30%" split_direction="vertical" {
-			pane 
-			pane cwd="../analytics_test_iam"
-		}
-	}
-	tab name="tf-service-prod" split_direction="horizontal" cwd="~/projects/tf-service/environments/analytics_prod" {
-		pane size="70%"
-		pane size="30%" split_direction="vertical" {
-			pane 
-			pane cwd="../analytics_prod_iam" 
-		}
 	}
 	tab name="btm" {
 		pane command="btm"
