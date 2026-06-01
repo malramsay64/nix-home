@@ -35,7 +35,8 @@ language-servers = ["rust-analyzer", "typos-lsp"]
 [[language]]
 name = "sql"
 file-types = ["sql"]
-formatter = { command = "sqlfluff", args = ["format"] }
+auto-format = true
+formatter = { command = "sqlfmt", args = ["-"] }
 
 [[language]]
 name = "yaml"
