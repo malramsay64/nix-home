@@ -22,9 +22,10 @@
     in {
       homeConfigurations."home" = home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
-        modules = [ ./home.nix ];
+        modules = [ ./shared.nix ./home.nix ];
 
         extraSpecialArgs = {
+          defaultBrowser = "zen";
           user = {
             username = "malcolm";
             name = "Malcolm Ramsay";
@@ -36,9 +37,10 @@
       homeConfigurations."work" = home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
 
-        modules = [ ./home.nix ];
+        modules = [ ./shared.nix ./work.nix ];
 
-        extraSpecialArgs = {          
+        extraSpecialArgs = {
+          defaultBrowser = "wslview";
           user = {
             username = "malcolm";
             name = "Malcolm Ramsay";
