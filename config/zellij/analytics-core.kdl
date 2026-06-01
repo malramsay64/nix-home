@@ -12,18 +12,41 @@ layout {
 		pane size="70%"
 		pane size="30%"
 	}
-	tab name="Model-API" split_direction="horizontal" cwd="~/projects/analytics-core/model-api" {
-		pane size="70%"
-		pane size="30%"		
+	tab name="Model-API" split_direction="vertical" cwd="~/projects/analytics-core/model-api" {
+		pane size="70%" split_direction="horizontal"{
+			pane size="70%"
+			pane
+		}
+		pane
 	}
 	tab name="JJ" split_direction="horizontal" cwd="~/projects/analytics-core/" {
-		pane
+		pane command="jjui"
 	}
 	tab name="notes" cwd="~/projects/tiimely-notes" {
 		pane
 	}
-	tab name="nix-home" cwd="~/projects/nix-home" {
-		pane size="70%"
+	tab name="btm" cwd="~/projects/analytics-core" {
+		pane command="btm"
+	}
+	tab name="Airflow" split_direction="vertical" cwd="~/projects/analytics-core/airflow" {
+		pane size="70%" split_direction="horizontal"{
+			pane size="70%"
+			pane
+		}
+		pane
+	}
+	tab name="Data Science" split_direction="vertical" cwd="~/projects/tiimely-notes/data-science" {
+		pane size="70%" split_direction="horizontal"{
+			pane size="70%"
+			pane
+		}
+		pane
+	}
+	tab name="nix-home" split_direction="vertical" cwd="~/projects/nix-home" {
+		pane size="70%" split_direction="horizontal"{
+			pane size="70%"
+			pane
+		}
 		pane
 	}
 	tab name="btm" {
