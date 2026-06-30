@@ -2,7 +2,6 @@
   config,
   pkgs,
   user,
-  defaultBrowser,
   ...
 }:
 {
@@ -41,19 +40,15 @@
     pkgs.jq
     pkgs.pqrs
     pkgs.difftastic
-    pkgs.terraform
     pkgs.nixfmt
     pkgs.mermaid-cli
     pkgs.prettier
     pkgs.prettier-plugin-jinja-template
     pkgs.jjui
-    pkgs.jiratui
 
-    pkgs.databricks-cli
     pkgs.sqlfluff
     pkgs.nodejs
 
-    pkgs.github-copilot-cli
     pkgs.claude-code
 
     # # It is sometimes useful to fine-tune packages, for example, by applying
@@ -128,9 +123,6 @@
       enableFishIntegration = true;
     };
     alacritty = {
-      enable = true;
-    };
-    awscli = {
       enable = true;
     };
     bat.enable = true;
