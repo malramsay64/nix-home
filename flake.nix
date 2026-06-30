@@ -31,11 +31,13 @@
 
       # Build nested attrset: org.repo.skillName = path-to-skill-dir
       availableSkills =
-        builtins.mapAttrs (org: repos:
+        builtins.mapAttrs (_: repos:
           builtins.mapAttrs (_: { src, dir }:
-            builtins.mapAttrs
-              (name: _: "${src}/${dir}/${name}")
-              (builtins.filterAttrs (_: type: type == "directory") (builtins.readDir "${src}/${dir}"))
+            let
+              entries = builtins.readDir "${src}/${dir}";
+              dirs = builtins.filter (name: entries.${name} == "directory") (builtins.attrNames entries);
+            in
+            builtins.listToAttrs (map (name: { inherit name; value = "${src}/${dir}/${name}"; }) dirs)
           ) repos
         ) skillSources;
 

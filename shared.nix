@@ -215,7 +215,6 @@
         };
       };
     };
-
     ripgrep.enable = true;
     starship = {
       enable = true;
