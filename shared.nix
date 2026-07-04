@@ -111,6 +111,8 @@
   ];
 
   # Let Home Manager install and manage itself.
+  services.ssh-agent.enable = true;
+
   programs = {
     home-manager.enable = true;
     ssh = {
