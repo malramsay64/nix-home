@@ -2,27 +2,31 @@
 let
   cfg = config.claude;
 
-  skillFiles = src:
-    let
-      entries = builtins.readDir src;
-      files = builtins.filter
-        (name: entries.${name} == "regular")
-        (builtins.attrNames entries);
-    in
-    builtins.listToAttrs (map (name: {
-      name = "claude/skills/${name}";
-      value = { source = "${src}/${name}"; };
-    }) files);
+  skillType = lib.types.submodule {
+    options = {
+      name = lib.mkOption {
+        type = lib.types.str;
+      };
+      path = lib.mkOption {
+        type = lib.types.addCheck lib.types.path (p:
+          let
+            s = toString p;
+            entries = builtins.readDir (builtins.dirOf s);
+          in
+          (entries.${builtins.baseNameOf s} or "regular") == "directory");
+      };
+    };
+  };
 in
 {
   options.claude.skills = lib.mkOption {
-    type = lib.types.listOf lib.types.path;
+    type = lib.types.listOf skillType;
     default = [];
-    description = "List of skill directories to symlink into ~/claude/skills";
+    description = "List of skills to symlink into ~/.claude/skills";
   };
 
   config.home.file = builtins.foldl'
-    (acc: skill: acc // skillFiles skill)
+    (acc: skill: acc // { ".claude/skills/${skill.name}" = { source = skill.path; }; })
     {}
     cfg.skills;
 }

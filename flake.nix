@@ -23,21 +23,25 @@
             allowUnfree = true;
           };
         };
+      lib = pkgs.lib;
 
       # Each entry: { src = <flake-input>; dir = "path/to/skills/within/repo"; }
       skillSources = {
         "vercel-labs"."skills" = { src = vercel-skills; dir = "skills"; };
       };
 
-      # Build nested attrset: org.repo.skillName = path-to-skill-dir
+      # Build nested attrset: org.repo.skillName = { name; path; }
       availableSkills =
         builtins.mapAttrs (_: repos:
           builtins.mapAttrs (_: { src, dir }:
             let
               entries = builtins.readDir "${src}/${dir}";
-              dirs = builtins.filter (name: entries.${name} == "directory") (builtins.attrNames entries);
+              # readDir propagates string context from its path arg onto attrset keys;
+              # strip it so skill names can be used as plain strings downstream.
+              dirs = map builtins.unsafeDiscardStringContext
+                (builtins.attrNames (lib.filterAttrs (_: type: type == "directory") entries));
             in
-            builtins.listToAttrs (map (name: { inherit name; value = "${src}/${dir}/${name}"; }) dirs)
+            lib.genAttrs dirs (name: { inherit name; path = /. + builtins.unsafeDiscardStringContext "${src}/${dir}/${name}"; })
           ) repos
         ) skillSources;
 
