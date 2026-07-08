@@ -7,6 +7,7 @@
     pkgs.github-copilot-cli
     pkgs.databricks-cli
     pkgs.awscli2
+    pkgs.hadolint
   ];
 
   home.sessionVariables = {

@@ -20,8 +20,8 @@ language-servers = ["taplo", "typos-lsp"]
 
 [[language]]
 name = "yaml"
-formatter = { command = 'prettier', args = ["--parser", "yaml"] }
-auto-format = false
+auto-format = true
+formatter = { command = "prettier", args = ["--parser", "yaml"] }
 language-servers = ["yaml-language-server"]
 
 [[language]]
