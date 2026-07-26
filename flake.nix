@@ -49,7 +49,7 @@
 
       homeConfigurations."home" = home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
-        modules = [ ./shared.nix ./home.nix ./skills.nix ];
+        modules = [ ./shared.nix ./home.nix ./skills.nix ./pi.nix ];
 
         extraSpecialArgs = {
           inherit availableSkills;
@@ -65,7 +65,7 @@
       homeConfigurations."work" = home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
 
-        modules = [ ./shared.nix ./work.nix ./skills.nix ];
+        modules = [ ./shared.nix ./work.nix ./skills.nix ./pi.nix ];
 
         extraSpecialArgs = {
           inherit availableSkills;

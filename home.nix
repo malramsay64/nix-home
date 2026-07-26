@@ -17,6 +17,7 @@
     pkgs.k9s
     pkgs.argocd
 
+    pkgs.llama-cpp-rocm
     # # It is sometimes useful to fine-tune packages, for example, by applying
     # # overrides. You can do that directly here, just don't forget the
     # # parentheses. Maybe you want to install Nerd Fonts with a limited number of
@@ -37,6 +38,11 @@
       User = "core";
       identityFile = "~/.ssh/id_ed25519";
     };
+    ssh.settings."k3s-syn-01" = {
+      Hostname = "192.168.10.27";
+      User = "core";
+      identityFile = "~/.ssh/id_ed25519";
+    };
     ssh.settings."git.malramsay.com" = {
       Hostname = "git.malramsay.com";
       User = "git";
@@ -47,7 +53,7 @@
       User = "ironmal";
       Port = 29979;
       identityFile = "~/.ssh/id_ed25519";
-      SetEnv = "TERM=xterm-256color";
+      SetEnv = { TERM = "xterm-256color"; };
     };
   };
 }
