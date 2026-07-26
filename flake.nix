@@ -54,6 +54,7 @@
         extraSpecialArgs = {
           inherit availableSkills;
           defaultBrowser = "zen";
+          profile = "home";
           user = {
             username = "malcolm";
             name = "Malcolm Ramsay";
@@ -70,6 +71,7 @@
         extraSpecialArgs = {
           inherit availableSkills;
           defaultBrowser = "wslview";
+          profile = "work";
           user = {
             username = "malcolm";
             name = "Malcolm Ramsay";

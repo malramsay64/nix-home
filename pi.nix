@@ -1,10 +1,58 @@
-{ pkgs, lib, config, ... }:
+{ pkgs, lib, config, profile, ... }:
 let
   cfg = config.programs.pi-coding-agent;
   # configDir is an absolute path (defaults to ~/.pi/agent); home.file needs
   # a path relative to $HOME.
   configDirRelative =
     lib.removePrefix "${config.home.homeDirectory}/" cfg.configDir;
+
+  jsonFormat = pkgs.formats.json { };
+
+  # MCP servers made available to pi via the pi-mcp-adapter package (see
+  # settings.packages below). Written to <configDir>/mcp.json, which is
+  # pi-mcp-adapter's global override file.
+  #
+  # Servers shared across all profiles:
+  # - github: GitHub's official remote MCP server. Auth is OAuth; on first
+  #   use run `/mcp-auth github` (or press ctrl+a on it in `/mcp`).
+  # - kubernetes: talks to whatever cluster your local kubeconfig/kubectl
+  #   context points at (see ssh/kubectl config elsewhere in this repo).
+  #
+  # Profile-specific servers:
+  # - trek (home only): personal server at https://trek.malramsay.com, OAuth
+  #   (confirmed via its `/.well-known/oauth-protected-resource/mcp`).
+  # - atlassian (work only): Atlassian's official remote MCP server (Jira /
+  #   Confluence), also OAuth (confirmed via `/v1/mcp` returning a Bearer
+  #   WWW-Authenticate challenge).
+  mcpServersCommon = {
+    github = {
+      url = "https://api.githubcopilot.com/mcp/";
+      auth = "oauth";
+    };
+    kubernetes = {
+      command = "npx";
+      args = [ "-y" "mcp-server-kubernetes" ];
+    };
+  };
+
+  mcpServersByProfile = {
+    home = {
+      trek = {
+        url = "https://trek.malramsay.com/mcp";
+        auth = "oauth";
+      };
+    };
+    work = {
+      atlassian = {
+        url = "https://mcp.atlassian.com/v1/mcp";
+        auth = "oauth";
+      };
+    };
+  };
+
+  mcpConfig = {
+    mcpServers = mcpServersCommon // (mcpServersByProfile.${profile} or { });
+  };
 in
 {
   programs.pi-coding-agent = {
@@ -80,4 +128,8 @@ in
   # above, resolved relative to programs.pi-coding-agent.configDir.
   home.file."${configDirRelative}/extensions/permission-gate.ts".source =
     ./pi/extensions/permission-gate.ts;
+
+  # MCP server config consumed by pi-mcp-adapter.
+  home.file."${configDirRelative}/mcp.json".source =
+    jsonFormat.generate "pi-mcp-adapter-mcp.json" mcpConfig;
 }
