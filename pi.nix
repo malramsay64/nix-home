@@ -100,6 +100,7 @@ in
       uv
       duckdb
       ripgrep
+      fd
 
       # Version control used by the agent for commits (see context.md).
       jujutsu
@@ -137,6 +138,7 @@ in
       # that asks for confirmation before running dangerous bash commands.
       extensions = [
         "extensions/permission-gate.ts"
+        "extensions/intelligent-find.ts"
       ];
     };
 
