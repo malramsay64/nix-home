@@ -249,6 +249,36 @@ function parseFindCommand(args: string[]): FindCommand {
   return result;
 }
 
+function translateToFd(cmd: FindCommand, intent: SearchIntent): string {
+  const scope = calculateScope(cmd.startPath, intent);
+
+  // fd syntax: fd [options] [pattern] [path]
+  let fdArgs: string[] = [];
+
+  // Add type filter if specified
+  if (cmd.type) {
+    if (cmd.type === "f") fdArgs.push("--type", "f");
+    else if (cmd.type === "d") fdArgs.push("--type", "d");
+  }
+
+  // Add max depth if specified
+  if (cmd.maxDepth) {
+    fdArgs.push("--max-depth", cmd.maxDepth.toString());
+  }
+
+  // Add exclude patterns
+  for (const excl of cmd.excludePatterns) {
+    fdArgs.push("--exclude", excl);
+  }
+
+  // Add the search pattern (fd expects it as argument, not -name flag)
+  const pattern = cmd.patterns.length > 0 ? cmd.patterns[0] : "*";
+
+  // Construct the full command
+  // fd returns absolute paths by default, similar to find
+  return `fd ${fdArgs.join(" ")} ${pattern} ${scope}`.trim();
+}
+
 export default function (pi: ExtensionAPI) {
   // TODO: Implement tool registration and parsing
 }
