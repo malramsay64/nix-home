@@ -8,12 +8,14 @@ let
         type = lib.types.str;
       };
       path = lib.mkOption {
-        type = lib.types.addCheck lib.types.path (p:
+        type = lib.types.addCheck lib.types.path (
+          p:
           let
             s = toString p;
             entries = builtins.readDir (builtins.dirOf s);
           in
-          (entries.${builtins.baseNameOf s} or "regular") == "directory");
+          (entries.${builtins.baseNameOf s} or "regular") == "directory"
+        );
       };
     };
   };
@@ -21,12 +23,24 @@ in
 {
   options.claude.skills = lib.mkOption {
     type = lib.types.listOf skillType;
-    default = [];
+    default = [ ];
     description = "List of skills to symlink into ~/.claude/skills";
   };
 
-  config.home.file = builtins.foldl'
-    (acc: skill: acc // { ".claude/skills/${skill.name}" = { source = skill.path; }; })
-    {}
-    cfg.skills;
+  config.home.file =
+    builtins.foldl'
+      (
+        acc: skill:
+        acc
+        // {
+          ".claude/skills/${skill.name}" = {
+            source = skill.path;
+          };
+        }
+      )
+      {
+        ".config/opencode/opencode.json".source = ./config/opencode/opencode.json;
+        ".config/opencode/tui.json".source = ./config/opencode/tui.json;
+      }
+      cfg.skills;
 }

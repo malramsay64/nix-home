@@ -1,5 +1,6 @@
 {
   pkgs,
+  pkgs-stable,
   user,
   ...
 }:
@@ -49,7 +50,7 @@
     pkgs.nodejs
 
     pkgs.claude-code
-    pkgs.opencode
+    pkgs-stable.opencode
 
     # # It is sometimes useful to fine-tune packages, for example, by applying
     # # overrides. You can do that directly here, just don't forget the
@@ -140,7 +141,10 @@
     fish = {
       enable = true;
       generateCompletions = true;
-      interactiveShellInit = "COMPLETE=fish jj | source";
+      interactiveShellInit = ''
+        COMPLETE=fish jj | source
+        set -gx GITHUB_PERSONAL_ACCESS_TOKEN (gh auth token 2>/dev/null)
+      '';
     };
     gh.enable = true;
     delta = {

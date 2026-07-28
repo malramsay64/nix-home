@@ -1,0 +1,40 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "anthropic/claude-sonnet-4-5",
+  "mcp": {
+    "github": {
+      "type": "remote",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "enabled": true,
+      "oauth": false,
+      "headers": {
+        "Authorization": "Bearer {env:GITHUB_PERSONAL_ACCESS_TOKEN}"
+      }
+    },
+    "atlassian": {
+      "type": "remote",
+      "url": "https://mcp.atlassian.com/v1/mcp/authv2",
+      "enabled": true
+    }
+  },
+  "command": {
+    "plan-opus": {
+      "template": "Plan the following task in detail before any implementation. Break it down into concrete steps, call out risks/unknowns, and don't write or edit any code yet.\n\n$ARGUMENTS",
+      "description": "Plan a task with Opus (deep reasoning, no edits)",
+      "agent": "plan",
+      "model": "anthropic/claude-opus-4-1"
+    },
+    "plan-sonnet": {
+      "template": "Plan the following task in detail before any implementation. Break it down into concrete steps, call out risks/unknowns, and don't write or edit any code yet.\n\n$ARGUMENTS",
+      "description": "Plan a task with Sonnet (no edits)",
+      "agent": "plan",
+      "model": "anthropic/claude-sonnet-4-5"
+    },
+    "execute": {
+      "template": "Implement the following, following any existing plan in this session. Work efficiently and keep changes minimal and focused.\n\n$ARGUMENTS",
+      "description": "Execute/implement with Haiku (fast, cheap)",
+      "agent": "build",
+      "model": "anthropic/claude-haiku-4-5"
+    }
+  }
+}

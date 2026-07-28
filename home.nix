@@ -1,9 +1,15 @@
-{ pkgs, availableSkills, ... }:
+{
+  pkgs,
+  availableSkills,
+  lib,
+  ...
+}:
 
 {
   claude.skills = [
     availableSkills."vercel-labs"."skills"."find-skills"
-  ];
+  ]
+  ++ builtins.attrValues availableSkills."awdemos"."opencode-superpowers";
 
   # The home.packages option allows you to install Nix packages into your
   # environment.
@@ -53,7 +59,9 @@
       User = "ironmal";
       Port = 29979;
       identityFile = "~/.ssh/id_ed25519";
-      SetEnv = { TERM = "xterm-256color"; };
+      SetEnv = {
+        TERM = "xterm-256color";
+      };
     };
   };
 }
