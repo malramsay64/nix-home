@@ -279,6 +279,40 @@ function translateToFd(cmd: FindCommand, intent: SearchIntent): string {
   return `fd ${fdArgs.join(" ")} ${pattern} ${scope}`.trim();
 }
 
+function translateToRg(
+  cmd: FindCommand,
+  intent: SearchIntent,
+  searchContent?: string
+): string {
+  const scope = calculateScope(cmd.startPath, intent);
+
+  // rg syntax: rg [options] [pattern] [path]
+  let rgArgs: string[] = [];
+
+  // Respect type filter
+  if (cmd.type === "f") {
+    rgArgs.push("--files");
+  }
+
+  // Exclude patterns
+  for (const excl of cmd.excludePatterns) {
+    rgArgs.push("--glob", `!${excl}`);
+  }
+
+  // Default to file listing when used as find replacement
+  rgArgs.push("--files");
+
+  // Max depth if specified
+  if (cmd.maxDepth) {
+    rgArgs.push("--max-depth", cmd.maxDepth.toString());
+  }
+
+  // Construct command
+  // If searchContent is provided, use it; otherwise use pattern from find
+  const query = searchContent || (cmd.patterns.length > 0 ? cmd.patterns[0] : "");
+  return `rg ${rgArgs.join(" ")} ${query} ${scope}`.trim();
+}
+
 export default function (pi: ExtensionAPI) {
   // TODO: Implement tool registration and parsing
 }
