@@ -272,11 +272,16 @@ function translateToFd(cmd: FindCommand, intent: SearchIntent): string {
   }
 
   // Add the search pattern (fd expects it as argument, not -name flag)
+  // Use --glob for glob patterns, otherwise treat as regex
   const pattern = cmd.patterns.length > 0 ? cmd.patterns[0] : "*";
-
-  // Construct the full command
-  // fd returns absolute paths by default, similar to find
-  return `fd ${fdArgs.join(" ")} ${pattern} ${scope}`.trim();
+  if (pattern.includes("*") || pattern.includes("?")) {
+    // It's a glob pattern, use --glob
+    fdArgs.push("--glob", pattern);
+    return `fd ${fdArgs.join(" ")} ${scope}`.trim();
+  } else {
+    // Treat as regex pattern
+    return `fd ${fdArgs.join(" ")} ${pattern} ${scope}`.trim();
+  }
 }
 
 function translateToRg(
