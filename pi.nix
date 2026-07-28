@@ -109,7 +109,8 @@ in
 
     settings = {
       theme = "dark";
-      defaultProvider = "anthropic";
+      defaultProvider = "github-copilot";
+      defaultModel = "claude-sonnet-5";
       compaction = {
         enabled = true;
       };
