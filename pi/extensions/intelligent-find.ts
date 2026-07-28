@@ -208,6 +208,47 @@ function calculateScope(startPath: string, intent: SearchIntent): string {
 // calculateScope("/usr/bin", "code") -> throws error (system path)
 // calculateScope("/", "code") -> throws error (root)
 
+function parseFindCommand(args: string[]): FindCommand {
+  const result: FindCommand = {
+    startPath: ".",
+    patterns: [],
+    excludePatterns: [],
+  };
+
+  let i = 0;
+  while (i < args.length) {
+    const arg = args[i];
+
+    if (arg === "-name" && i + 1 < args.length) {
+      result.patterns.push(args[i + 1]);
+      i += 2;
+    } else if (arg === "-type" && i + 1 < args.length) {
+      result.type = args[i + 1] as "f" | "d" | "l";
+      i += 2;
+    } else if (arg === "-maxdepth" && i + 1 < args.length) {
+      result.maxDepth = parseInt(args[i + 1], 10);
+      i += 2;
+    } else if (arg === "-not" || arg === "!") {
+      if (i + 1 < args.length && args[i + 1] === "-name" && i + 2 < args.length) {
+        result.excludePatterns.push(args[i + 2]);
+        i += 3;
+      } else {
+        i += 1;
+      }
+    } else if (!arg.startsWith("-")) {
+      // First non-flag argument is the start path
+      if (!result.startPath || result.startPath === ".") {
+        result.startPath = arg;
+      }
+      i += 1;
+    } else {
+      i += 1;
+    }
+  }
+
+  return result;
+}
+
 export default function (pi: ExtensionAPI) {
   // TODO: Implement tool registration and parsing
 }
