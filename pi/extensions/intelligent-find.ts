@@ -314,5 +314,70 @@ function translateToRg(
 }
 
 export default function (pi: ExtensionAPI) {
-  // TODO: Implement tool registration and parsing
+  pi.on("tool_call", async (event, ctx) => {
+    if (event.toolName !== "find") return undefined;
+
+    try {
+      // Parse the find command arguments
+      const findCmd = parseFindCommand(
+        (event.input.args || []) as string[]
+      );
+
+      // Detect search intent
+      const intent = detectIntent(
+        findCmd.patterns,
+        findCmd.patterns[0]
+      );
+
+      // Determine which tool to use
+      let command: string;
+
+      if (intent === "code" || intent === "config") {
+        // Use fd for file discovery
+        command = translateToFd(findCmd, intent);
+        if (ctx.hasUI) {
+          ctx.ui.notify(
+            `find → fd: Routing file search to fd with scope detection`,
+            "info"
+          );
+        }
+      } else {
+        // Use fd for general file searches
+        command = translateToFd(findCmd, intent);
+        if (ctx.hasUI) {
+          ctx.ui.notify(
+            `find → fd: Routing to fd for safer file discovery`,
+            "info"
+          );
+        }
+      }
+
+      // Execute the translated command
+      try {
+        const result = execSync(command, {
+          encoding: "utf-8",
+          stdio: ["pipe", "pipe", "pipe"],
+        });
+
+        return {
+          output: result,
+        };
+      } catch (execError: any) {
+        // fd/rg exited with error (e.g., no results found)
+        if (execError.status === 1) {
+          return {
+            output: "", // No results, return empty
+          };
+        }
+        throw execError;
+      }
+    } catch (error) {
+      // Safety or parsing errors
+      const message =
+        error instanceof Error ? error.message : String(error);
+      return {
+        error: message,
+      };
+    }
+  });
 }
