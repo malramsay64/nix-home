@@ -75,6 +75,60 @@ interface FindCommand {
   nameOnly?: boolean;
 }
 
+type SearchIntent = "code" | "config" | "general";
+
+function detectIntent(patterns: string[], fileName?: string): SearchIntent {
+  // Check filename first (highest priority)
+  if (fileName) {
+    const lower = fileName.toLowerCase();
+    if (CONFIG_FILENAMES.includes(lower)) return "config";
+    for (const ext of CONFIG_EXTENSIONS) {
+      if (lower.endsWith(ext)) return "config";
+    }
+    for (const ext of CODE_EXTENSIONS) {
+      if (lower.endsWith(ext)) return "code";
+    }
+  }
+
+  // Check patterns for file extensions
+  for (const pattern of patterns) {
+    const lower = pattern.toLowerCase();
+
+    // Check for explicit file type patterns (e.g., "*.ts", "*.json")
+    if (lower.includes("*.") || lower.includes(".")) {
+      const ext = lower.match(/\.[\w]+/)?.[0];
+      if (ext) {
+        if (CODE_EXTENSIONS.includes(ext)) return "code";
+        if (CONFIG_EXTENSIONS.includes(ext)) return "config";
+      }
+    }
+
+    // Check for grep/content search indicators
+    if (
+      pattern.includes("-exec") ||
+      pattern.includes("grep") ||
+      pattern.includes("xargs")
+    ) {
+      // Content search - more likely code
+      return "code";
+    }
+
+    // Check if pattern mentions config-related keywords
+    if (/config|env|rc$|json|yaml|toml/i.test(pattern)) {
+      return "config";
+    }
+  }
+
+  // Default to general for unknown patterns
+  return "general";
+}
+
+// Test cases (for manual verification):
+// detectIntent([".ts", "*.tsx"]) -> "code"
+// detectIntent([".json"]) -> "config"
+// detectIntent([".env"]) -> "config"
+// detectIntent(["*.txt"]) -> "general"
+
 export default function (pi: ExtensionAPI) {
   // TODO: Implement tool registration and parsing
 }
