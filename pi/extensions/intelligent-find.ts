@@ -129,6 +129,85 @@ function detectIntent(patterns: string[], fileName?: string): SearchIntent {
 // detectIntent([".env"]) -> "config"
 // detectIntent(["*.txt"]) -> "general"
 
+function isSystemPath(path: string): boolean {
+  const normalized = resolve(path);
+  return BLOCKED_PATHS.some(
+    (blocked) =>
+      normalized === blocked || normalized.startsWith(blocked + "/")
+  );
+}
+
+function findProjectRoot(startPath: string): string | null {
+  let current = resolve(startPath);
+  const root = "/";
+
+  // Walk up max 10 levels to find project marker
+  for (let i = 0; i < 10; i++) {
+    if (current === root) break;
+
+    for (const marker of PROJECT_MARKERS) {
+      try {
+        execSync(`test -e "${current}/${marker}"`, { stdio: "ignore" });
+        return current;
+      } catch {
+        // Marker doesn't exist, continue
+      }
+    }
+
+    // Move up one directory
+    const parent = current.split("/").slice(0, -1).join("/") || "/";
+    if (parent === current) break; // Reached root
+    current = parent;
+  }
+
+  return null;
+}
+
+function calculateScope(startPath: string, intent: SearchIntent): string {
+  const normalized = resolve(startPath);
+  const home = homedir();
+
+  // Safety check: reject system paths and root
+  if (isSystemPath(normalized) || normalized === "/") {
+    throw new Error(
+      `find: cannot search in system path "${normalized}" for safety/performance reasons. ` +
+        `Use rg/fd in a scoped directory within your project or home directory.`
+    );
+  }
+
+  // If starting path is not in home, reject it
+  if (!normalized.startsWith(home)) {
+    throw new Error(
+      `find: cannot search outside home directory (${home}). ` +
+        `Requested path: ${normalized}`
+    );
+  }
+
+  // For code searches: try to find project root, otherwise use home
+  if (intent === "code") {
+    const projectRoot = findProjectRoot(normalized);
+    if (projectRoot) return projectRoot;
+  }
+
+  // For config searches: allow home + project config dirs
+  if (intent === "config") {
+    const projectRoot = findProjectRoot(normalized);
+    // Config searches can span home + project, but we'll search project root if found
+    if (projectRoot) return projectRoot;
+    return home;
+  }
+
+  // For general: stick to CWD only
+  return normalized;
+}
+
+// Scope detection test cases:
+// calculateScope("/home/user/projects/myapp", "code") -> "/home/user/projects/myapp" (project root)
+// calculateScope("/home/user/projects/myapp/src", "code") -> "/home/user/projects/myapp" (walk up to project)
+// calculateScope("/home/user", "config") -> "/home/user"
+// calculateScope("/usr/bin", "code") -> throws error (system path)
+// calculateScope("/", "code") -> throws error (root)
+
 export default function (pi: ExtensionAPI) {
   // TODO: Implement tool registration and parsing
 }
