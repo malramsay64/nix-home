@@ -30,8 +30,13 @@ let
   #   elsewhere in this repo).
   mcpServersCommon = {
     github = {
-      url = "https://api.githubcopilot.com/mcp/";
-      auth = "oauth";
+      command = "docker";
+      args = [ "run" "-i" "--rm"
+               "-e" "GITHUB_PERSONAL_ACCESS_TOKEN"
+               "ghcr.io/github/github-mcp-server"
+               "--toolsets" "repos" ];
+      env = { "GITHUB_PERSONAL_ACCESS_TOKEN" = "\${GITHUB_PAT}"; };
+      lifecycle = "lazy";
     };
     kubernetes = {
       command = "npx";
@@ -185,7 +190,7 @@ in
       # type-checking, structural analysis via ast-grep/jscpd/knip/etc.).
       # https://www.npmjs.com/package/pi-lens
       packages = [
-        "git:github.com/obra/superpowers"
+        # "git:github.com/obra/superpowers"
         "npm:pi-lsp"
         "npm:pi-mcp-adapter"
         "npm:pi-subagents"
