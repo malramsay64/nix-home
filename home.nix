@@ -9,7 +9,8 @@
   claude.skills = [
     availableSkills."vercel-labs"."skills"."find-skills"
   ]
-  ++ builtins.attrValues availableSkills."awdemos"."opencode-superpowers";
+  ++ builtins.attrValues availableSkills."awdemos"."opencode-superpowers"
+  ++ builtins.attrValues availableSkills."pymc-labs"."python-analytics-skills";
 
   # The home.packages option allows you to install Nix packages into your
   # environment.

@@ -17,6 +17,10 @@
       url = "github:awdemos/opencode-superpowers";
       flake = false;
     };
+    python-analytics-skills = {
+      url = "github:pymc-labs/python-analytics-skills";
+      flake = false;
+    };
   };
 
   outputs =
@@ -26,6 +30,7 @@
       home-manager,
       vercel-skills,
       superpowers-skills,
+      python-analytics-skills,
       ...
     }:
     let
@@ -52,6 +57,10 @@
         };
         "awdemos"."opencode-superpowers" = {
           src = superpowers-skills;
+          dir = "skills";
+        };
+        "pymc-labs"."python-analytics-skills" = {
+          src = python-analytics-skills;
           dir = "skills";
         };
       };
