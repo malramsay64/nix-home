@@ -28,7 +28,7 @@ export default function (pi: ExtensionAPI) {
 
 	// TODO: for now every bash command requires confirmation; once this has
 	// settled, flip back to only prompting when isDangerous is true.
-	const REQUIRE_CONFIRMATION_FOR_ALL_BASH = true;
+	const REQUIRE_CONFIRMATION_FOR_ALL_BASH = false;
 
 	pi.on("tool_call", async (event, ctx) => {
 		if (event.toolName !== "bash") return undefined;

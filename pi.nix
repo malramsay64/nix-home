@@ -35,7 +35,7 @@ let
                "-e" "GITHUB_PERSONAL_ACCESS_TOKEN"
                "ghcr.io/github/github-mcp-server"
                "--toolsets" "repos" ];
-      env = { "GITHUB_PERSONAL_ACCESS_TOKEN" = "\${GITHUB_PAT}"; };
+      env = { "GITHUB_PERSONAL_ACCESS_TOKEN" = "\${GITHUB_TOKEN}"; };
       lifecycle = "lazy";
     };
     kubernetes = {
@@ -162,7 +162,7 @@ in
     settings = {
       theme = "dark";
       defaultProvider = "github-copilot";
-      defaultModel = "claude-sonnet-5";
+      defaultModel = "claude-haiku-4.5";
       compaction = {
         enabled = true;
       };
@@ -194,6 +194,7 @@ in
         "npm:pi-lsp"
         "npm:pi-mcp-adapter"
         "npm:pi-subagents"
+        "npm:pi-web-access"
         # "npm:pi-lens"
       ];
 

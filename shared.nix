@@ -46,6 +46,7 @@
     pkgs.prettier-plugin-jinja-template
     pkgs.jjui
 
+    pkgs.pandoc
     pkgs.sqlfluff
     pkgs.nodejs
 
