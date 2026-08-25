@@ -1,2 +1,4 @@
 .jj
 result
+*.tar.gz
+*.tgz

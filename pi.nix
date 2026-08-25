@@ -17,6 +17,7 @@ let
   #   use run `/mcp-auth github` (or press ctrl+a on it in `/mcp`).
   # - kubernetes: talks to whatever cluster your local kubeconfig/kubectl
   #   context points at (see ssh/kubectl config elsewhere in this repo).
+  # - context7: up-to-date library/framework docs on demand. No auth.
   #
   # Profile-specific servers:
   # - trek (home only): personal server at https://trek.malramsay.com, OAuth
@@ -24,6 +25,9 @@ let
   # - atlassian (work only): Atlassian's official remote MCP server (Jira /
   #   Confluence), also OAuth (confirmed via `/v1/mcp` returning a Bearer
   #   WWW-Authenticate challenge).
+  # - aws (work only): AWS Labs' official core MCP server. Uses whatever AWS
+  #   credentials/profile are active in the environment (see awscli2 config
+  #   elsewhere in this repo).
   mcpServersCommon = {
     github = {
       url = "https://api.githubcopilot.com/mcp/";
@@ -32,6 +36,17 @@ let
     kubernetes = {
       command = "npx";
       args = [ "-y" "mcp-server-kubernetes" ];
+      lifecycle = "lazy";
+    };
+    nixos = {
+        command= "uvx";
+        args= ["mcp-nixos"];
+        lifecycle= "lazy";
+      };
+    context7 = {
+      command = "npx";
+      args = [ "-y" "@upstash/context7-mcp" ];
+      lifecycle = "lazy";
     };
   };
 
@@ -46,6 +61,11 @@ let
       atlassian = {
         url = "https://mcp.atlassian.com/v1/mcp";
         auth = "oauth";
+      };
+      aws = {
+        command = "uvx";
+        args = [ "awslabs.core-mcp-server@latest" ];
+        lifecycle = "lazy";
       };
     };
   };
@@ -83,6 +103,7 @@ in
 
       # Version control used by the agent for commits (see context.md).
       jujutsu
+
     ];
 
     settings = {
