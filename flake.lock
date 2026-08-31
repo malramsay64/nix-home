@@ -1,0 +1,116 @@
+{
+  "nodes": {
+    "home-manager": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1787797243,
+        "narHash": "sha256-8+Q7NOB7RPajRjA4pbCDLzqH+MTjnG9x6LUPLfL2joA=",
+        "owner": "nix-community",
+        "repo": "home-manager",
+        "rev": "99c9ec63390f1d8c14d95d9e8b17cc29cfbd4e11",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "home-manager",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1788039129,
+        "narHash": "sha256-pa4Q0qErvCvzCaaUph7Sm37RhR4xvPrYI8Lgz6k85+A=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "d2f67949798825fe853f7c5d0492b8bf016d3f88",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs-stable": {
+      "locked": {
+        "lastModified": 1782847189,
+        "narHash": "sha256-twXPFqFsrrY5r28Zh7Homgcp2gUMBgQ6WDS98Q/3xFI=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "b6018f87da91d19d0ab4cf979885689b469cdd41",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixos-25.11",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "python-analytics-skills": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1782140739,
+        "narHash": "sha256-bof7JihzMwfwm0/sjtd401E6uI8gCq6tqdqIVHx0Aq4=",
+        "owner": "pymc-labs",
+        "repo": "python-analytics-skills",
+        "rev": "a69c19530dfa2e3d89b4aba154b5abac0abe755e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "pymc-labs",
+        "repo": "python-analytics-skills",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "home-manager": "home-manager",
+        "nixpkgs": "nixpkgs",
+        "nixpkgs-stable": "nixpkgs-stable",
+        "python-analytics-skills": "python-analytics-skills",
+        "superpowers-skills": "superpowers-skills",
+        "vercel-skills": "vercel-skills"
+      }
+    },
+    "superpowers-skills": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1783743353,
+        "narHash": "sha256-nNiP+pffz5TBGocOAXfhPvfJ/GUPuL7TPCRm45Ify3c=",
+        "owner": "awdemos",
+        "repo": "opencode-superpowers",
+        "rev": "bc2332b83feb6ddcd90a5b064608bc1457c51cfa",
+        "type": "github"
+      },
+      "original": {
+        "owner": "awdemos",
+        "repo": "opencode-superpowers",
+        "type": "github"
+      }
+    },
+    "vercel-skills": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1787084911,
+        "narHash": "sha256-qD+gGPYjgbArf1Nz5rtlJVCS/2KNTuspag/B079l014=",
+        "owner": "vercel-labs",
+        "repo": "skills",
+        "rev": "435076e78988e1e6ec40d00b0b1d76bdbbc5419a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "vercel-labs",
+        "repo": "skills",
+        "type": "github"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
