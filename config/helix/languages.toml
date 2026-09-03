@@ -5,6 +5,7 @@ dbt-language-server = { command = "dbt-language-server" }
 sqls = { command = "sqls" }
 tinymist = { command = "tinymist" }
 ty = { command = "ty" }
+zizmor = { command = "zizmor", args = ["--lsp"] }
 
 [language-server.basedpyright]
 command = "basedpyright-langserver"
@@ -23,6 +24,10 @@ name = "yaml"
 auto-format = true
 formatter = { command = "prettier", args = ["--parser", "yaml"] }
 language-servers = ["yaml-language-server"]
+
+[[language]]
+name = "github-action"
+language-servers = ["yaml-language-server", "zizmor"]
 
 [[language]]
 name = "json"

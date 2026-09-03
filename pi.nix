@@ -28,6 +28,9 @@ let
   # - aws (work only): AWS Labs' official core MCP server. Uses whatever AWS
   #   credentials/profile are active in the environment (see awscli2 config
   #   elsewhere in this repo).
+  # - datadog (work only): Datadog's official remote MCP server.
+  # - databricks (work only): Databricks' managed system AI MCP server,
+  #   authenticated through Databricks OAuth.
   mcpServersCommon = {
     github = {
       command = "docker";
@@ -70,6 +73,20 @@ let
       aws = {
         command = "uvx";
         args = [ "awslabs.core-mcp-server@latest" ];
+        lifecycle = "lazy";
+      };
+      datadog = {
+        type = "http";
+        url = "https://mcp.us3.datadoghq.com/v1/mcp?toolsets=dashboards";
+      };
+      databricks = {
+        type = "http";
+        url = "https://dbc-e4009998-54f1.cloud.databricks.com/api/2.0/mcp/functions/system/ai";
+        auth = "oauth";
+      };
+      aikido = {
+        command = "npx";
+        args = [ "-y" "@aikidosec/mcp@latest" ];
         lifecycle = "lazy";
       };
     };
@@ -162,7 +179,7 @@ in
     settings = {
       theme = "dark";
       defaultProvider = "github-copilot";
-      defaultModel = "claude-haiku-4.5";
+      defaultModel = "gpt-5.6-luna";
       compaction = {
         enabled = true;
       };

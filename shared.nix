@@ -45,6 +45,7 @@
     pkgs.prettier
     pkgs.prettier-plugin-jinja-template
     pkgs.jjui
+    pkgs.exiftool
 
     pkgs.pandoc
     pkgs.sqlfluff
@@ -211,6 +212,7 @@
         pkgs.prettierd
         pkgs.omnisharp-roslyn
         pkgs.ty
+        pkgs.zizmor
       ];
     };
     jujutsu = {
