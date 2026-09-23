@@ -21,51 +21,37 @@
 
   # The home.packages option allows you to install Nix packages into your
   # environment.
-  home.packages = [
-    # # Adds the 'hello' command to your environment. It prints a friendly
-    # # "Hello, world!" when run.
-    # pkgs.hello
-    pkgs.iosevka
-    pkgs.uv
-    pkgs.duckdb
-    pkgs.zellij
-    pkgs.typst
-    pkgs.lazyjj
 
-    pkgs.tree
-    pkgs.just
-    pkgs.bottom
-    pkgs.dust
-    pkgs.hyperfine
-    pkgs.jq
-    pkgs.pqrs
-    pkgs.difftastic
-    pkgs.nixfmt
-    pkgs.mermaid-cli
-    pkgs.prettier
-    pkgs.prettier-plugin-jinja-template
-    pkgs.jjui
-    pkgs.exiftool
+  home.packages = with pkgs; [
+    # Core Tools
+    iosevka
+    uv
+    duckdb
+    zellij
+    typst
+    lazyjj
+    tree
+    just
+    bottom
+    dust
+    hyperfine
+    jq
+    pqrs
+    difftastic
+    nixfmt
+    mermaid-cli
+    prettier
+    prettier-plugin-jinja-template
+    jjui
+    sqlfluff
+    nodejs
+    exiftool
+    pandoc
+    betterleaks
 
-    pkgs.pandoc
-    pkgs.sqlfluff
-    pkgs.nodejs
-
-    pkgs.claude-code
-    pkgs-stable.opencode
-
-    # # It is sometimes useful to fine-tune packages, for example, by applying
-    # # overrides. You can do that directly here, just don't forget the
-    # # parentheses. Maybe you want to install Nerd Fonts with a limited number of
-    # # fonts?
-    # (pkgs.nerdfonts.override { fonts = [ "FantasqueSansMono" ]; })
-
-    # # You can also create simple shell scripts directly inside your
-    # # configuration. For example, this adds a command 'my-hello' to your
-    # # environment:
-    # (pkgs.writeShellScriptBin "my-hello" ''
-    #   echo "Hello, ${config.home.username}!"
-    # '')
+    # Development
+    claude-code
+    opencode
   ];
   fonts.fontconfig.enable = true;
 

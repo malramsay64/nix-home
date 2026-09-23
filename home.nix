@@ -40,29 +40,6 @@
   ];
 
   programs = {
-    ssh.settings."k3s-node-01" = {
-      Hostname = "192.168.10.26";
-      User = "core";
-      identityFile = "~/.ssh/id_ed25519";
-    };
-    ssh.settings."k3s-syn-01" = {
-      Hostname = "192.168.10.27";
-      User = "core";
-      identityFile = "~/.ssh/id_ed25519";
-    };
-    ssh.settings."git.malramsay.com" = {
-      Hostname = "git.malramsay.com";
-      User = "git";
-      identityFile = "~/.ssh/id_ed25519";
-    };
-    ssh.settings."hamilton" = {
-      Hostname = "192.168.10.10";
-      User = "ironmal";
-      Port = 29979;
-      identityFile = "~/.ssh/id_ed25519";
-      SetEnv = {
-        TERM = "xterm-256color";
-      };
-    };
+    ssh = import ./hosts.nix;
   };
 }

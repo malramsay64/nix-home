@@ -66,7 +66,6 @@ language-servers = ["rust-analyzer", "typos-lsp"]
 name = "sql"
 scope = "source.sql"
 file-types = ["sql"]
-file-types = ["sql"]
 auto-format = true
 formatter = { command = "sqlfmt", args = ["-"] }
 

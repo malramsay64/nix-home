@@ -86,9 +86,14 @@
         ) repos
       ) skillSources;
 
+      baseUser = {
+        username = "malcolm";
+        name = "Malcolm Ramsay";
+        home = "/home/malcolm";
+      };
+
     in
     {
-
       homeConfigurations."home" = home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
         modules = [
@@ -102,12 +107,7 @@
           inherit availableSkills pkgs-stable;
           defaultBrowser = "zen";
           profile = "home";
-          user = {
-            username = "malcolm";
-            name = "Malcolm Ramsay";
-            home = "/home/malcolm";
-            email = "m@malramsay.com";
-          };
+          user = baseUser // { email = "m@malramsay.com"; };
         };
       };
       homeConfigurations."work" = home-manager.lib.homeManagerConfiguration {
@@ -124,12 +124,7 @@
           inherit availableSkills pkgs-stable;
           defaultBrowser = "wslview";
           profile = "work";
-          user = {
-            username = "malcolm";
-            name = "Malcolm Ramsay";
-            home = "/home/malcolm";
-            email = "malcolm.ramsay@tiimely.com";
-          };
+          user = baseUser // { email = "malcolm.ramsay@tiimely.com"; };
         };
       };
     };
