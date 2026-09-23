@@ -8,92 +8,28 @@ let
 
   jsonFormat = pkgs.formats.json { };
 
-  # MCP servers made available to pi via the pi-mcp-adapter package (see
-  # settings.packages below). Written to <configDir>/mcp.json, which is
-  # pi-mcp-adapter's global override file.
-  #
-  # Servers shared across all profiles:
-  # - github: GitHub's official remote MCP server. Auth is OAuth; on first
-  #   use run `/mcp-auth github` (or press ctrl+a on it in `/mcp`).
-  # - kubernetes: talks to whatever cluster your local kubeconfig/kubectl
-  #   context points at (see ssh/kubectl config elsewhere in this repo).
-  # - context7: up-to-date library/framework docs on demand. No auth.
-  #
-  # Profile-specific servers:
-  # - trek (home only): personal server at https://trek.malramsay.com, OAuth
-  #   (confirmed via its `/.well-known/oauth-protected-resource/mcp`).
-  # - atlassian (work only): Atlassian's official remote MCP server (Jira /
-  #   Confluence), also OAuth (confirmed via `/v1/mcp` returning a Bearer
-  #   WWW-Authenticate challenge).
-  # - aws (work only): AWS Labs' official core MCP server. Uses whatever AWS
-  #   credentials/profile are active in the environment (see awscli2 config
-  #   elsewhere in this repo).
-  # - datadog (work only): Datadog's official remote MCP server.
-  # - databricks (work only): Databricks' managed system AI MCP server,
-  #   authenticated through Databricks OAuth.
-  mcpServersCommon = {
-    github = {
-      command = "docker";
-      args = [ "run" "-i" "--rm"
-               "-e" "GITHUB_PERSONAL_ACCESS_TOKEN"
-               "ghcr.io/github/github-mcp-server"
-               "--toolsets" "repos" ];
-      env = { "GITHUB_PERSONAL_ACCESS_TOKEN" = "\${GITHUB_TOKEN}"; };
-      lifecycle = "lazy";
-    };
-    kubernetes = {
-      command = "npx";
-      args = [ "-y" "mcp-server-kubernetes" ];
-      lifecycle = "lazy";
-    };
-    nixos = {
-        command= "uvx";
-        args= ["mcp-nixos"];
-        lifecycle= "lazy";
-      };
-    context7 = {
-      command = "npx";
-      args = [ "-y" "@upstash/context7-mcp" ];
-      lifecycle = "lazy";
-    };
-  };
+  mcpConfig = import ./pi/mcp.nix { inherit profile; };
+  modelsConfig = import ./pi/models.nix { inherit config; };
 
-  mcpServersByProfile = {
-    home = {
-      trek = {
-        url = "https://trek.malramsay.com/mcp";
-        auth = "oauth";
-      };
-    };
-    work = {
-      atlassian = {
-        url = "https://mcp.atlassian.com/v1/mcp";
-        auth = "oauth";
-      };
-      aws = {
-        command = "uvx";
-        args = [ "awslabs.core-mcp-server@latest" ];
-        lifecycle = "lazy";
-      };
-      datadog = {
-        type = "http";
-        url = "https://mcp.us3.datadoghq.com/v1/mcp?toolsets=dashboards";
-      };
-      databricks = {
-        type = "http";
-        url = "https://dbc-e4009998-54f1.cloud.databricks.com/api/2.0/mcp/functions/system/ai";
-        auth = "oauth";
-      };
-      aikido = {
-        command = "npx";
-        args = [ "-y" "@aikidosec/mcp@latest" ];
-        lifecycle = "lazy";
-      };
-    };
-  };
-
-  mcpConfig = {
-    mcpServers = mcpServersCommon // (mcpServersByProfile.${profile} or { });
+  # Wraps pi-coding-agent so OP_SERVICE_ACCOUNT_TOKEN is set for pi's own
+  # process (and anything it shells out to, e.g. the `op read` calls in
+  # modelsConfig above) without exporting it in every shell. The token itself
+  # is never baked into the nix store: --run injects a shell snippet into the
+  # wrapper that reads the token file at wrapper *runtime*, each time pi
+  # starts, rather than at build time.
+  #
+  # Requires the token to be placed at ~/.config/op/service-account-token
+  # (chmod 600), scoped to just the vault(s) pi needs (e.g. Homelab).
+  wrappedPackage = pkgs.symlinkJoin {
+    inherit (pkgs.pi-coding-agent) meta;
+    name = "pi-coding-agent-with-op-service-account";
+    paths = [ pkgs.pi-coding-agent ];
+    nativeBuildInputs = [ pkgs.makeWrapper ];
+    postBuild = ''
+      wrapProgram $out/bin/pi \
+        --run 'export OP_SERVICE_ACCOUNT_TOKEN=$(cat "$HOME/.config/op/service-account-token" 2>/dev/null)' \
+        --run 'export HOMEASSISTANT_TOKEN=$(op read "op://Homelab/Home Assistant/mcp-token" 2>/dev/null)'
+    '';
   };
 
   # pi-lsp server config, written to <configDir>/lsp.json (global config,
@@ -141,6 +77,7 @@ in
 {
   programs.pi-coding-agent = {
     enable = true;
+    package = wrappedPackage;
 
     # Tools available on PATH to the pi agent itself (bash tool, packages it
     # installs via `pi packages add`, MCP adapters, etc). Chosen to cover
@@ -242,4 +179,8 @@ in
   # pi-lsp global server config (see lspConfig above).
   home.file."${configDirRelative}/lsp.json".source =
     jsonFormat.generate "pi-lsp-lsp.json" lspConfig;
+
+  # Custom model providers (LiteLLM proxy) consumed by pi directly.
+  home.file."${configDirRelative}/models.json".source =
+    jsonFormat.generate "pi-models.json" modelsConfig;
 }
