@@ -3,6 +3,10 @@ theme = "onedark"
 [editor]
 line-number = "relative"
 
+[editor.auto-save]
+focus-lost = true
+after-delay.enable = true
+
 [editor.whitespace.render]
 space = "none"
 newline = "all"
@@ -26,5 +30,4 @@ display-messages = true
 "minus" = "file_picker_in_current_buffer_directory"
 
 [keys.insert]
-j = {k = "normal_mode"}
-
+j = { k = "normal_mode" }
