@@ -14,9 +14,12 @@ You are extracting GF and DF evidence for a **coeliac + dairy-intolerant** diner
 2. **Mark `is_coeliac_reviewer: true` only** when the reviewer explicitly self-identifies as coeliac / celiac. "GF" or "gluten-free" alone does not qualify.
 3. **Weight each piece of evidence** per `sources.yaml` tier × recency decay (see rubric).
 4. **Reaction reports** — first-person credible "got glutened / made me sick / had a reaction" → `is_reaction_report: true`. Vague second-hand complaints do not qualify.
-5. **Oat milk**: if the only plant milk is oat, flag it separately. Do not include oat in `plant_milks_available` as a positive DF signal — list it with a note.
+5. **Oat milk**: set `oat_only_warning: true` only if no non-oat plant milk is available *even on request*. Oat never counts as a positive DF signal.
 6. **Vague positive claims** ("they have GF options") get weight 0.5 unless corroborated by specifics.
 7. **Menu evidence** is separate from review evidence — don't double-count. A GF label on the menu is `menu.gf_labelled_items`, not a gf_evidence entry.
+8. **Not evidence**: the user's own trip/TREK notes, and marketing claims restated by aggregator sites. These never count toward `source_count_independent`.
+9. **Blocked sources**: if a page returns 403/paywall (common for Find Me Gluten Free), you may use the search-result snippet as evidence at half weight, marked `"source": "<site> (snippet)"`. Record the block in `extraction_notes`.
+10. **Operating status**: record `operating_status` from recent reviews / closure news.
 
 ## Output JSON shape
 
@@ -25,6 +28,8 @@ You are extracting GF and DF evidence for a **coeliac + dairy-intolerant** diner
   "venue": "",
   "city": "",
   "country": "",
+  "operating_status": "open | closed | moved | unknown",
+  "venue_type": "single_kitchen | multi_stall | no_food",
   "menu": {
     "source": "venue_site | google_maps | instagram | facebook | burpple | foody | user_upload | none",
     "source_url": "",
@@ -32,8 +37,8 @@ You are extracting GF and DF evidence for a **coeliac + dairy-intolerant** diner
     "staleness": "fresh | aging | stale | unknown",
     "gf_labelled_items": [],
     "df_labelled_items": [],
-    "separate_gf_menu": true,
-    "allergen_key_present": true,
+    "separate_gf_menu": null,
+    "allergen_key_present": null,
     "red_flag_ingredients": [],
     "notes": ""
   },
@@ -44,7 +49,7 @@ You are extracting GF and DF evidence for a **coeliac + dairy-intolerant** diner
         "source": "",
         "source_tier": "coeliac_specialist | allergy_blog | general_review | social | venue_own",
         "date": "YYYY-MM-DD or null",
-        "is_coeliac_reviewer": true,
+        "is_coeliac_reviewer": null,
         "weight": 3.0
       }
     ],

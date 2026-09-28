@@ -10,7 +10,20 @@
     availableSkills."vercel-labs"."skills"."find-skills"
   ]
   ++ builtins.attrValues availableSkills."awdemos"."opencode-superpowers"
-  ++ builtins.attrValues availableSkills."pymc-labs"."python-analytics-skills";
+  ++ builtins.attrValues availableSkills."pymc-labs"."python-analytics-skills"
+  ++ [
+    {
+      name = "gf-df-trip";
+      path = ./pi/skills/gf-df-trip;
+    }
+  ];
+
+  # Delivered by home-manager as a generated personal plugin, so it lives
+  # alongside (not inside) the mutable ~/.claude.json.
+  programs.claude-code.mcpServers.trek = {
+    type = "http";
+    url = "https://trek.malramsay.com/mcp";
+  };
 
   # The home.packages option allows you to install Nix packages into your
   # environment.
@@ -24,6 +37,8 @@
     pkgs.k9s
     pkgs.argocd
 
+    pkgs.zola
+    pkgs.wrangler
     pkgs.llama-cpp-rocm
     # # It is sometimes useful to fine-tune packages, for example, by applying
     # # overrides. You can do that directly here, just don't forget the

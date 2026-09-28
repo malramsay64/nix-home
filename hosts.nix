@@ -17,6 +17,17 @@
       IdentityFile = "~/.ssh/id_ed25519";
     };
 
+    # Home
+    "hamilton" = {
+      HostName = "192.168.10.10";
+      User = "ironmal";
+      Port = 29979;
+      IdentityFile = "~/.ssh/id_ed25519";
+      SetEnv = {
+        TERM = "xterm-256color";
+      };
+    };
+
     # Git
     "git.malramsay.com" = {
       HostName = "git.malramsay.com";

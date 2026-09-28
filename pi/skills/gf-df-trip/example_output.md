@@ -8,7 +8,8 @@ Both venues below are **fictional**, used only to show the output shape. Replace
 
 ```
 The Sprout Pantry — Singapore (Tiong Bahru)
-GF ★★★★☆ (4/5) · DF ★★★★☆ (4/5)
+GF ★★★★☆ (4/5) · DF ★★★★☆ (4/5) · Food ★★★★☆ (4.4/5)
+Price: $$
 Verified: 2026-04-20
 Menu: venue_site, 2026-03-02 — fresh
 
@@ -39,7 +40,8 @@ Sources:
 
 ```
 Pho Lan — Hanoi (Ba Dinh)
-GF ★★★☆☆ (3/5) · DF ★★★★☆ (4/5)
+GF ★★☆☆☆ (2/5) · DF ★★★☆☆ (3/5) · Food ★★★★☆ (4.2/5)
+Price: $
 Verified: 2026-04-20
 Menu: facebook, 2025-11-10 — aging
 
@@ -69,7 +71,8 @@ Note: source_count_independent = 2, right at threshold. Needs in-person verifica
 
 ```
 Kopi & Co — Singapore (Joo Chiat)
-GF ★★☆☆☆ (2/5) · DF ★★☆☆☆ (2/5)
+GF ★★☆☆☆ (2/5) · DF ★★☆☆☆ (2/5) · Food ★★★☆☆ (4.1/5)
+Price: $
 Verified: 2026-04-20
 Menu: instagram, 2026-02-18 — fresh
 

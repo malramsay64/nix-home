@@ -13,3 +13,10 @@ not raw `git`, even in repositories that are backed by a git store.
   `git log`.
 - Only fall back to `git` directly if `jj` is unavailable in the repository,
   or the user explicitly asks for a raw git command.
+
+## Context usage
+
+- Delegate broad codebase searches, large file reads, and exploratory
+  investigation to a subagent (`subagent` tool), and have it report back only
+  the conclusions and relevant file paths/line numbers.
+- Read files in targeted ranges rather than whole when only part is needed.

@@ -97,12 +97,19 @@ in
       # Self-hosted via the LiteLLM proxy in models.json (home only).
       defaultProvider = "litellm";
       defaultModel = "qwen3.8-27b";
+      modelThinkingLevels."litellm/qwen3.8-27b" = "medium";
     } else {
       defaultProvider = "github-copilot";
       defaultModel = "gpt-6-luna";
     }) // {
       compaction = {
         enabled = true;
+        # Qwen3.8 only has a 64K window (see pi/models.nix): compact later and
+        # keep less verbatim so more of it is left for work between compactions.
+        modelOverrides."litellm/qwen3.8-27b" = {
+          reserveTokens = 12288;
+          keepRecentTokens = 12000;
+        };
       };
       retry = {
         enabled = true;

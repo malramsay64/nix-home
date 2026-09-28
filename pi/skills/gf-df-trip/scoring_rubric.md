@@ -7,11 +7,16 @@ Primary diner: **coeliac + dairy-intolerant adult**. Scoring is skeptical by def
 | Score | Label | Criteria |
 |---|---|---|
 | 5 | Coeliac-confident | EITHER (a) dedicated GF kitchen / fryer / prep station or formal certification (Coeliac UK / Coeliac Australia accredited, AFDIAN, etc.), OR (b) shared kitchen with **exceptional** coeliac protocols: 3+ explicit coeliac reviewers report safe meals, zero credible reaction reports, staff demonstrably make whole menu adaptable, editorial press recognises coeliac-awareness. |
-| 4 | Strong GF program | Separate prep protocols described by staff or reviews, labelled GF menu, staff show CC awareness. 3+ positive coeliac reviews, zero reaction reports. |
+| 4 | Strong GF program | EITHER (a) a separate GF prep area, station or fryer (described by staff, menu, or reviews) AND staff who are generally knowledgeable about GF/CC, OR (b) no separate area, but excellent GF/coeliac reviews (consistently positive across 2+ independent sources) AND strong support (staff actively adapt dishes, answer CC questions well, take precautions). Zero reaction reports either way. |
 | 3 | GF-aware | GF items labelled, staff answer CC questions competently, no explicit separate prep. Positive GF (not necessarily coeliac) reviews dominate. |
 | 2 | GF on request | Kitchen will "try" but shared surfaces/fryers. Safe for GF-by-choice, **not coeliac-safe**. |
 | 1 | Naturally GF only | No GF program; some dishes inherently GF (pho, rice bowls). High CC risk from soy sauce, shared woks. |
 | 0 | Avoid | No GF option, or multiple credible coeliac reaction reports. |
+
+**GF evidence floor** — scores are earned by venue-specific evidence, never by cuisine or ingredients:
+- GF 3 needs labelled GF items or a documented instance of staff answering CC questions competently.
+- GF 4 needs either (a) a separate prep area, station or fryer **and** generally knowledgeable staff, or (b) excellent GF/coeliac reviews across 2+ independent sources **and** strong staff support (adapting dishes, good CC answers, precautions like cleaning surfaces or changing gloves). Good support with only one source, or good reviews without evidence of support, stays at GF 3.
+- Ingredient-GF food (rice rolls, pho, sticky rice) with no venue-specific evidence is **max 2** — usually 1.
 
 ## DF scale (0–5)
 
@@ -24,7 +29,15 @@ Primary diner: **coeliac + dairy-intolerant adult**. Scoring is skeptical by def
 | 1 | Dairy-forward | French bistro / gelateria / creamery — maybe one safe item. |
 | 0 | Everything dairy | No viable option. |
 
-**Oat milk rule**: Oat is *not* GF-safe for this diner. Its presence does not count as a ✓. If it is the *only* plant milk, DF score caps at 2 and a warning must appear in the verdict block.
+**Oat milk rule**: Oat is *not* GF-safe for this diner. Its presence does not count as a ✓. **Oat-only** means no non-oat plant milk is available, *including on request*. If oat-only, DF caps at 2 and a warning must appear in the verdict block. If soy/almond/coconut/rice is available on request, the cap does not apply — say "ask for soy/almond".
+
+**DF baseline — absence of evidence is not dairy.** Before applying evidence, set a starting DF from what the menu is made of:
+- Naturally low-dairy cuisines (Vietnamese, Thai, Chinese, Malay, Japanese, Korean, hawker food): start at **4**. Pull down for known dairy (condensed-milk coffee, cream curries, dessert focus).
+- Mixed / modern cafe / brunch: start at **3**.
+- Butter- and cream-based cuisines (French, Italian fine dining, bakery, gelato): start at **2**.
+DF 1 is reserved for venues where nearly every item contains dairy. Caps (thin evidence → 3) still apply after the baseline.
+
+**Coffee venues** — for the Coffee category, DF is about drinks: one GF-safe plant milk (soy, almond, coconut, rice, macadamia) → DF 4; two or more → DF 5; oat-only → cap 2; none → 1. Mention food DF separately in the bullets if the venue also serves food.
 
 ## Evidence weights
 
@@ -72,7 +85,9 @@ Record source URL and date in the output.
 - **Menu-only assessment** (no usable reviews): cap GF and DF at 3, note "menu-based estimate".
 - **Thin evidence** (< 2 independent sources): cap at 3, set `needs_in_person_verification = true`.
 - **Oat-only plant milk**: DF cap = 2, explicit warning.
-- **Naturally-GF cuisine trap**: Vietnamese and some SE Asian cuisines are *ingredient*-GF but *preparation*-risky. Soy sauce is wheat-based by default here; shared woks and fryers are standard. Do not inflate scores on cuisine type alone.
+- **Naturally-GF cuisine trap**: Vietnamese and some SE Asian cuisines are *ingredient*-GF but *preparation*-risky. Soy sauce is wheat-based by default here; shared woks and fryers are standard. Do not inflate scores on cuisine type alone — see the GF evidence floor (max 2 without venue-specific evidence).
+- **Multi-stall venues** (hawker centres, food courts): score named stalls where evidence exists; the venue line reports the best stall's scores and names it. With no stall-level evidence, GF ≤ 1 and DF from the baseline, capped at 3.
+- **User's own notes** in the trip are not evidence and do not count as a source.
 
 ## Red-flag phrases on menus
 

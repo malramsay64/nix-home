@@ -7,6 +7,7 @@ coeliac_specialist:
     - name: Find Me Gluten Free
       url: https://www.findmeglutenfree.com
       notes: Prefer reviews explicitly tagged "celiac" / "coeliac". Strong AU coverage. Vietnam coverage is thin — search anyway.
+        Venue pages often return 403 to fetch tools — use the search-result snippet at half weight and note "(snippet)".
     - name: r/Coeliac
       url: https://www.reddit.com/r/Coeliac
     - name: r/glutenfree

@@ -50,7 +50,6 @@
     betterleaks
 
     # Development
-    claude-code
     opencode
   ];
   fonts.fontconfig.enable = true;
@@ -103,6 +102,10 @@
   services.ssh-agent.enable = true;
 
   programs = {
+    # Profile-specific MCP servers are added via programs.claude-code.mcpServers
+    # (e.g. in home.nix).
+    claude-code.enable = true;
+
     home-manager.enable = true;
     ssh = {
       enable = true;

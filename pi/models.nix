@@ -9,19 +9,17 @@
       apiKey = ''!op read "op://Homelab/LLM/litellm-master-key"'';
       models = [
         {
-          id = "qwen3.8-27b-tools";
-          name = "Qwen3.8 27B (tools)";
+          # Multimodal (mmproj loaded) dense reasoning model. Served with 64K of
+          # its 256K max context (kubelab apps/services/llm
+          # qwen3827bContextSize) to fit the 16GB card.
+          id = "qwen3.8-27b";
+          name = "Qwen3.8 27B";
           reasoning = true;
-          input = [ "text" ];
-          contextWindow = 128000;
-          maxTokens = 32768;
+          input = [ "text" "image" ];
+          contextWindow = 65536;
+          # Kept well under half the window so replies don't crowd out context.
+          maxTokens = 16384;
         }
-        { id = "qwen3.8-27b"; name = "Qwen3.8 27B"; }
-        { id = "qwen3-27b"; name = "Qwen3 27B"; }
-        { id = "qwen-coder"; name = "Qwen Coder"; }
-        { id = "qwen-coder-tools"; name = "Qwen Coder (tools)"; }
-        { id = "qwen-vl"; name = "Qwen VL (vision)"; input = [ "text" "image" ]; }
-        { id = "gemma4"; name = "Gemma 4"; }
         { id = "gemma4-12b"; name = "Gemma 4 12B"; }
       ];
     };

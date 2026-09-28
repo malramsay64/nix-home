@@ -6,20 +6,16 @@ Load `scoring_rubric.md` for the 0–5 scales, weights, decay, and caps.
 
 ## Scoring algorithm
 
-1. **GF raw score**
-   - Sum `gf_evidence.positive[].weight`
-   - Subtract sum of `gf_evidence.negative[].weight`
-   - Add menu weight: +1.0 per `menu.gf_labelled_items` up to +3.0 max, times menu freshness multiplier
-2. **DF raw score**
-   - Same as above with DF evidence
-   - Add +1.0 per GF-safe plant milk available (soy, almond, coconut, rice, macadamia), max +3.0
-   - Do not credit oat milk. If `oat_only_warning: true`, do not add any plant milk points.
-3. **Map raw → 0–5 band** using judgement against the rubric labels. Round to whole number.
-4. **Apply caps in this order:**
+Work through these steps in order. The weights in the rubric decide which evidence counts most when signals conflict; the score itself comes from matching the rubric criteria, not from arithmetic.
+
+1. **GF score** — pick the highest GF row in the rubric whose criteria the evidence actually meets, then check the **GF evidence floor**: no venue-specific evidence → max 2; GF 3 needs labelled items or documented competent CC answers; GF 4 needs either a separate prep area/station/fryer plus generally knowledgeable staff, or excellent GF/coeliac reviews across 2+ independent sources plus strong staff support.
+2. **DF score** — start from the **DF baseline** for the cuisine (rubric). Move up for labelled DF items, substitution systems, or GF-safe plant milks; move down for documented dairy in core dishes. Coffee-category venues use the rubric's Coffee venues rule. Absence of evidence never lowers DF.
+3. **Apply caps in this order:**
    - Any `is_reaction_report: true` → `gf_score = min(gf_score, 2)`
    - Menu-only (no reviews with evidence) → `gf_score, df_score = min(_, 3)`
    - `needs_in_person_verification: true` → `gf_score, df_score = min(_, 3)`
-   - `plant_milks_available.oat_only_warning: true` → `df_score = min(df_score, 2)`
+   - `plant_milks_available.oat_only_warning: true` (no non-oat milk even on request) → `df_score = min(df_score, 2)`
+4. **Self-check** before writing: for each score, name the rubric criterion it rests on and the source that shows it. If you can't, lower the score.
 5. **Derive favorite flag**: `favorite = gf_score >= 4 AND df_score >= 3`
 6. **Food rating**: independent of GF/DF — score per rubric §Food rating using Google + TripAdvisor + editorial. Display 1-decimal score.
 7. **Pricing**: from Google `price_level` and concrete per-person figures; display per rubric §Pricing.
@@ -63,6 +59,34 @@ Sources:
 - Each bullet ≤ 12 words.
 - Safe bets and Avoid must be derived from `safe_dish_candidates` / `avoid_dish_candidates`, plus menu analysis. If none, write `—`.
 - Category suggestion per rubric §Category mapping.
+
+## Other outcomes
+
+Closed venue (no scores):
+```
+<Venue name> — <City>
+CLOSED — <closure date if known>, per <source, date>
+```
+
+Venue with no prepared food or drink:
+```
+<Venue name> — <City>
+NOT ASSESSED — <what it is, e.g. grocery / play space with no menu found>
+<one line of GF/DF-relevant tips if useful, e.g. "stocks GF pasta and plant milks">
+```
+
+## TREK notes form
+
+When writing to TREK, use this compact form under the marker line (≤ ~1000 characters so the user's notes fit within the 2000 limit):
+```
+--- GF/DF check <YYYY-MM-DD> ---
+GF <n>/5 · DF <n>/5 · Menu: <source, date or "none found">
+✓ <signal>
+⚠ <risk>
+Safe: <items> | Avoid: <items> | Ask: <questions>
+Sources: <domain (date)>, <domain (date)>
+```
+Same scoring rules and bullet limits as the full block; drop the Food/Price/Category lines.
 
 ## Do not
 

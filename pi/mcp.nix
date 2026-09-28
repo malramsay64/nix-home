@@ -47,7 +47,11 @@ let
         env = {
           HOMEASSISTANT_URL = "https://homeassistant.malramsay.com";
         };
-        lifecycle = "lazy";
+        # lazy-keep-alive: still starts on first use rather than at session
+        # start, but stays resident afterwards instead of idle-disconnecting.
+        # Plain "lazy" respawns (and re-runs `op run`, re-prompting
+        # 1Password) on every idle-timeout reconnect.
+        lifecycle = "lazy-keep-alive";
       };
     };
     work = {
