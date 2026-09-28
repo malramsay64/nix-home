@@ -4,6 +4,8 @@
     litellm = {
       baseUrl = "https://llm.malramsay.com/v1";
       api = "openai-completions";
+      # Resolved lazily by pi itself (cached for the process lifetime) via the
+      # 1Password desktop app; the key never enters the agent's shell env.
       apiKey = ''!op read "op://Homelab/LLM/litellm-master-key"'';
       models = [
         {

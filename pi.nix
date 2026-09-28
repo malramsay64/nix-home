@@ -8,29 +8,8 @@ let
 
   jsonFormat = pkgs.formats.json { };
 
-  mcpConfig = import ./pi/mcp.nix { inherit profile; };
+  mcpConfig = import ./pi/mcp.nix { inherit pkgs profile; };
   modelsConfig = import ./pi/models.nix { inherit config; };
-
-  # Wraps pi-coding-agent so OP_SERVICE_ACCOUNT_TOKEN is set for pi's own
-  # process (and anything it shells out to, e.g. the `op read` calls in
-  # modelsConfig above) without exporting it in every shell. The token itself
-  # is never baked into the nix store: --run injects a shell snippet into the
-  # wrapper that reads the token file at wrapper *runtime*, each time pi
-  # starts, rather than at build time.
-  #
-  # Requires the token to be placed at ~/.config/op/service-account-token
-  # (chmod 600), scoped to just the vault(s) pi needs (e.g. Homelab).
-  wrappedPackage = pkgs.symlinkJoin {
-    inherit (pkgs.pi-coding-agent) meta;
-    name = "pi-coding-agent-with-op-service-account";
-    paths = [ pkgs.pi-coding-agent ];
-    nativeBuildInputs = [ pkgs.makeWrapper ];
-    postBuild = ''
-      wrapProgram $out/bin/pi \
-        --run 'export OP_SERVICE_ACCOUNT_TOKEN=$(cat "$HOME/.config/op/service-account-token" 2>/dev/null)' \
-        --run 'export HOMEASSISTANT_TOKEN=$(op read "op://Homelab/Home Assistant/mcp-token" 2>/dev/null)'
-    '';
-  };
 
   # pi-lsp server config, written to <configDir>/lsp.json (global config,
   # trusted automatically). Python is wired to `ruff server` (lint/format
@@ -77,7 +56,6 @@ in
 {
   programs.pi-coding-agent = {
     enable = true;
-    package = wrappedPackage;
 
     # Tools available on PATH to the pi agent itself (bash tool, packages it
     # installs via `pi packages add`, MCP adapters, etc). Chosen to cover
@@ -180,7 +158,13 @@ in
   home.file."${configDirRelative}/lsp.json".source =
     jsonFormat.generate "pi-lsp-lsp.json" lspConfig;
 
-  # Custom model providers (LiteLLM proxy) consumed by pi directly.
-  home.file."${configDirRelative}/models.json".source =
-    jsonFormat.generate "pi-models.json" modelsConfig;
+  # User-level skills, discovered from <configDir>/skills/.
+  home.file."${configDirRelative}/skills/gf-df-trip".source =
+    ./pi/skills/gf-df-trip;
+
+  # Custom model providers (LiteLLM proxy) consumed by pi directly. Home only:
+  # the proxy is homelab infrastructure and its key comes from 1Password.
+  home.file."${configDirRelative}/models.json" = lib.mkIf (profile == "home") {
+    source = jsonFormat.generate "pi-models.json" modelsConfig;
+  };
 }

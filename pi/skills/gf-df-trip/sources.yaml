@@ -1,0 +1,105 @@
+# Source whitelist for GF/DF trip vetting
+# Weights defined in scoring_rubric.md
+
+coeliac_specialist:
+  weight: 3.0
+  sources:
+    - name: Find Me Gluten Free
+      url: https://www.findmeglutenfree.com
+      notes: Prefer reviews explicitly tagged "celiac" / "coeliac". Strong AU coverage. Vietnam coverage is thin — search anyway.
+    - name: r/Coeliac
+      url: https://www.reddit.com/r/Coeliac
+    - name: r/glutenfree
+      url: https://www.reddit.com/r/glutenfree
+    - name: Coeliac UK
+      url: https://www.coeliac.org.uk
+    - name: Coeliac Australia
+      url: https://www.coeliac.org.au
+
+allergy_aware_blogs:
+  weight: 2.0
+  sources:
+    - name: Legally Gluten Free
+      url: https://legallygf.com
+    - name: European Coffee Trip
+      url: https://europeancoffeetrip.com
+      use_for: DF plant milks only — NOT for GF claims
+    - name: Gluten Free Singapore blogs
+      search: '"gluten free" Singapore site:substack.com OR site:medium.com'
+    - name: Dairy Free Singapore blogs
+      search: '"dairy free" Singapore site:substack.com OR site:medium.com'
+    - name: Vietnam allergy blogs
+      search: '"gluten free" Vietnam (Hanoi OR "Ho Chi Minh" OR Hoi An) -pinterest'
+    - name: Australia allergy blogs
+      search: '"gluten free" "coeliac" <city> Australia site:substack.com OR site:medium.com OR site:wordpress.com'
+
+general_reviews:
+  weight: 1.0
+  universal:
+    - name: Google Maps reviews
+      notes: Filter for "gluten", "coeliac", "celiac", "dairy", "lactose", "vegan"
+    - name: TripAdvisor
+      url: https://www.tripadvisor.com
+  singapore:
+    - name: Burpple
+      url: https://www.burpple.com
+    - name: HungryGoWhere
+      url: https://www.hungrygowhere.com
+  vietnam:
+    - name: Foody.vn
+      url: https://www.foody.vn
+    - name: Riviu
+      url: https://riviu.vn
+  australia:
+    - name: Coeliac Australia venue directory
+      url: https://www.coeliac.org.au
+      notes: Endorsement / accreditation programme — strong signal when present
+    - name: Broadsheet
+      url: https://www.broadsheet.com.au
+      notes: Editorial reviews; search for "gluten free" or "coeliac" mentions
+    - name: The Urban List
+      url: https://www.theurbanlist.com
+      notes: City guides — search for GF roundups
+    - name: Australian Good Food Guide
+      url: https://www.agfg.com.au
+
+social:
+  weight: 1.0
+  use_for: menu freshness primarily, occasional diner reports
+  sources:
+    - name: Instagram
+      search: 'site:instagram.com <venue> menu'
+    - name: Facebook pages
+      notes: Heavy use in Vietnam for menu updates and daily specials
+    - name: TikTok
+      notes: Sometimes has menu walkthroughs; use for freshness only
+
+venue_own:
+  weight: 0.5
+  sources:
+    - Restaurant website
+    - Venue's own Instagram / Facebook page
+    - Linktree or similar landing page
+
+reaction_reports:
+  weight: -5.0
+  caps_gf_at: 2
+  signals:
+    - "got glutened"
+    - "made me sick"
+    - "reacted badly"
+    - "cross contamination"
+    - "coeliac reaction"
+    - "had to leave"
+    - "spent the night"
+  exclude:
+    - "didn't get sick" (positive signal, handle separately)
+    - marketing disclaimers
+
+geo_scope:
+  tuned_regions:
+    - Singapore
+    - Vietnam
+    - Australia
+  reject_outside: false
+  outside_tuned_note: "Use universal sources only; flag 'limited regional source coverage' in verdict."

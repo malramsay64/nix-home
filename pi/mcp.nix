@@ -1,5 +1,14 @@
-{ profile }:
+{ pkgs, profile }:
 let
+  # Secrets for MCP servers are injected per-server with `op run` (1Password
+  # desktop app auth, so first use prompts for approval). Only the op://
+  # secret references live in the nix store; the resolved values exist solely
+  # in the MCP server's process, never in pi's environment or the agent's
+  # bash tool. https://www.1password.dev/get-started/secure-ai-access
+  opRun = envFile: command: {
+    command = "op";
+    args = [ "run" "--env-file=${envFile}" "--" ] ++ command;
+  };
   mcpServersCommon = {
     github = {
       url = "https://api.githubcopilot.com/mcp/";
@@ -29,11 +38,12 @@ let
         auth = "oauth";
       };
       # https://github.com/homeassistant-ai/ha-mcp
-      # HOMEASSISTANT_TOKEN is exported by the pi wrapper (see pi.nix) so it
-      # isn't baked into the nix store; ha-mcp inherits it via inheritEnv.
-      homeassistant = {
-        command = "uvx";
-        args = [ "ha-mcp@latest" ];
+      homeassistant = opRun
+        (pkgs.writeText "homeassistant-mcp.env" ''
+          HOMEASSISTANT_TOKEN="op://Homelab/Home Assistant/mcp-token"
+        '')
+        [ "uvx" "ha-mcp@latest" ]
+      // {
         env = {
           HOMEASSISTANT_URL = "https://homeassistant.malramsay.com";
         };
