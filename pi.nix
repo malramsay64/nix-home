@@ -93,8 +93,14 @@ in
 
     settings = {
       theme = "dark";
+    } // (if profile == "home" then {
+      # Self-hosted via the LiteLLM proxy in models.json (home only).
+      defaultProvider = "litellm";
+      defaultModel = "qwen3.8-27b";
+    } else {
       defaultProvider = "github-copilot";
-      defaultModel = "gpt-5.6-luna";
+      defaultModel = "gpt-6-luna";
+    }) // {
       compaction = {
         enabled = true;
       };
