@@ -2,10 +2,14 @@ theme = "onedark"
 
 [editor]
 line-number = "relative"
+end-of-line-diagnostics = "hint"
 
 [editor.auto-save]
 focus-lost = true
 after-delay.enable = true
+
+[editor.inline-diagnostics]
+cursor-line = "warning"
 
 [editor.whitespace.render]
 space = "none"
