@@ -2,6 +2,8 @@
   pkgs,
   pkgs-stable,
   user,
+  profile,
+  config,
   ...
 }:
 {
@@ -23,6 +25,104 @@
   # environment.
 
   home.packages = with pkgs; [
+    (writeShellApplication {
+      name = "upgrade-everything";
+      runtimeInputs = [ nix uv nodejs config.programs.pi-coding-agent.package ];
+      text = ''
+        flake_dir="''${NIX_HOME_FLAKE:-$HOME/projects/nix-home}"
+        if [[ ! -d "$flake_dir" ]]; then
+          echo "Nix Home flake directory not found: $flake_dir" >&2
+          echo "Set NIX_HOME_FLAKE to the checkout directory and retry." >&2
+          exit 2
+        fi
+
+        failures=()
+        run_step() {
+          local name="$1"
+          shift
+          printf '\n==> %s\n' "$name"
+          if "$@"; then
+            printf '    completed: %s\n' "$name"
+          else
+            local status=$?
+            printf '    FAILED (%s): %s\n' "$status" "$name" >&2
+            failures+=("$name")
+          fi
+        }
+
+        upgrade_uv_tools() {
+          uv tool upgrade --all
+        }
+
+        upgrade_pi_extensions() {
+          pi update --extensions
+        }
+
+        refresh_mcp_tool_caches() {
+          local entry key
+          while IFS= read -r entry; do
+            key="''${entry%%:*}"
+            if [[ "$key" =~ ^[[:xdigit:]]+$ ]]; then
+              case "$entry" in
+                *mcp-server-kubernetes*|*@upstash/context7-mcp*|*@aikidosec/mcp*)
+                  npm cache npx rm "$key" || return $?
+                  ;;
+              esac
+            fi
+          done < <(npm cache npx ls)
+
+          uv cache clean mcp-nixos ha-mcp awslabs.core-mcp-server
+        }
+
+        upgrade_determinate_nix() {
+          if command -v determinate-nixd >/dev/null 2>&1; then
+            /usr/bin/sudo "$(command -v determinate-nixd)" upgrade
+          else
+            echo "Determinate Nix not detected; skipping the Nix installation upgrade."
+          fi
+        }
+
+        upgrade_nix_and_home_manager() {
+          (cd "$flake_dir" && nix flake update) && \
+            home-manager switch --flake "$flake_dir#${profile}"
+        }
+
+        ${
+          if profile == "work" then
+            ''
+              upgrade_apt() {
+                /usr/bin/sudo apt-get update && /usr/bin/sudo apt-get upgrade -y
+              }
+
+              upgrade_winget() {
+                winget.exe upgrade --all --accept-source-agreements --accept-package-agreements
+              }
+
+              open_windows_update() {
+                powershell.exe -NoProfile -Command "Start-Process 'ms-settings:windowsupdate'"
+              }
+
+              run_step "Ubuntu system packages (apt)" upgrade_apt
+              run_step "Windows packages (winget)" upgrade_winget
+              run_step "Open Windows Update settings" open_windows_update
+            ''
+          else
+            ""
+        }
+        run_step "uv tools" upgrade_uv_tools
+        run_step "Pi packages" upgrade_pi_extensions
+        run_step "Refresh one-shot MCP tool caches" refresh_mcp_tool_caches
+        run_step "Determinate Nix installation" upgrade_determinate_nix
+        run_step "Nix flake inputs and Home Manager" upgrade_nix_and_home_manager
+
+        if (( ''${#failures[@]} )); then
+          printf '\nUpgrade finished with failures: %s\n' "''${failures[*]}" >&2
+          exit 1
+        fi
+        printf '\nAll upgrades completed successfully.\n'
+      '';
+    })
+
     # Core Tools
     iosevka
     uv
@@ -43,7 +143,6 @@
     prettier
     prettier-plugin-jinja-template
     jjui
-    sqlfluff
     nodejs
     exiftool
     pandoc

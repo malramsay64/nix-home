@@ -116,6 +116,13 @@ in
         maxRetries = 3;
       };
 
+      # pi-subagents uses fresh context by default, while its builtin agents
+      # still inherit repository instructions. Keep that behavior explicit so
+      # children don't accidentally rely on unrelated parent conversation.
+      subagents = {
+        defaultSubagentContext = "fresh";
+      };
+
       # Superpowers: a structured development methodology (brainstorming ->
       # planning -> TDD -> review) shipped as a pi package.
       # https://github.com/obra/superpowers
@@ -138,7 +145,8 @@ in
         # "git:github.com/obra/superpowers"
         "npm:pi-lsp"
         "npm:pi-mcp-adapter"
-        "npm:pi-subagents"
+        # Pin the extension so declarative installs are reproducible.
+        "npm:pi-subagents@0.81.0"
         "npm:pi-web-access"
         # "npm:pi-lens"
       ];

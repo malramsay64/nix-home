@@ -20,3 +20,11 @@ not raw `git`, even in repositories that are backed by a git store.
   investigation to a subagent (`subagent` tool), and have it report back only
   the conclusions and relevant file paths/line numbers.
 - Read files in targeted ranges rather than whole when only part is needed.
+
+## Subagents
+
+`pi-subagents` is available for delegated work. When I explicitly ask you to
+use subagents, you can use its built-in `scout`, `worker`, `reviewer`, and
+`oracle` agents, or ask me which role I want. Keep assignments narrow and
+report their results; do not delegate merely because a task is large or
+complex unless I ask for delegation.
