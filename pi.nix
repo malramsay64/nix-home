@@ -153,7 +153,10 @@ in
 
       # Locally managed extensions, e.g. the permission-gate extension below
       # that asks for confirmation before running dangerous bash commands.
+      # pi-mcp-adapter supplies its own /mcp command, so disable Pi's built-in
+      # MCP extension to avoid loading two extensions that register /mcp.
       extensions = [
+        "-builtin:mcp"
         "extensions/permission-gate.ts"
         "extensions/intelligent-find.ts"
       ];
