@@ -1,0 +1,44 @@
+onboarding = false
+
+[terminal]
+new_cwd = "follow" # new panes/tabs open in the current worktree
+
+[ui]
+status_indicators = "symbols"
+agent_panel_sort = "priority"                              # blocked/needs-input agents float to the top
+prompt_new_tab_name = false                                # Zellij-like: no name prompt for new tabs
+tab_bar_right = [{ type = "zoom" }, { type = "datetime" }]
+
+[ui.toast]
+delivery = "system"
+
+[keys]
+prefix = "ctrl+b"
+
+# Worktrees
+new_worktree = "prefix+shift+g"  # new branch + checkout + workspace
+open_worktree = "prefix+shift+o" # pick an existing checkout
+remove_worktree = "prefix+alt+d" # git worktree remove (keeps the branch)
+
+# Zellij-style direct keys (no prefix)
+focus_pane_left = ["prefix+h", "alt+h"]
+focus_pane_down = ["prefix+j", "alt+j"]
+focus_pane_up = ["prefix+k", "alt+k"]
+focus_pane_right = ["prefix+l", "alt+l"]
+split_vertical = ["prefix+v", "alt+n"]
+zoom = ["prefix+z", "alt+f"]
+next_tab = ["prefix+n", "alt+]"]
+previous_tab = ["prefix+p", "alt+["]
+next_workspace = "alt+shift+j"           # move between worktrees
+previous_workspace = "alt+shift+k"
+resize_pane_left = "alt+shift+h"
+resize_pane_right = "alt+shift+l"
+last_pane = "alt+o"
+
+[keys.indexed]
+workspaces = "alt" # alt+1..9 jumps straight to a worktree
+
+[[keys.command]]
+key = "prefix+ctrl+g"
+type = "pane"
+command = "lazygit"

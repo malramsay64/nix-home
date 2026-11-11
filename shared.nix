@@ -170,6 +170,7 @@
     ".config/helix/config.toml".source = config/helix/config.toml;
     ".config/helix/languages.toml".source = config/helix/languages.toml;
     ".config/zellij/config.kdl".source = config/zellij/config.kdl;
+    ".config/herdr/config.toml".source = config/herdr/config.toml;
 
     # # You can also set the file content immediately.
     # ".gradle/gradle.properties".text = ''
@@ -238,6 +239,9 @@
       generateCompletions = true;
       interactiveShellInit = ''
         COMPLETE=fish jj | source
+        if command -q herdr
+          herdr completion fish | source
+        end
         set -gx GITHUB_PERSONAL_ACCESS_TOKEN (gh auth token 2>/dev/null)
       '';
     };
