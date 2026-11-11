@@ -7,11 +7,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792896866,
-        "narHash": "sha256-/0tELNnhdSnP+bHSdWiEe6KpfSwi6WrTnT9cm/jNkjA=",
+        "lastModified": 1794278858,
+        "narHash": "sha256-rkrJwLgLSHBnXfgoSKIDa+2LLGdTqynsV3GAxOTGhUU=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "c216bf5a1f173b0481bd5c8c489ebe5595ecc68c",
+        "rev": "82ce401aa350502897c3f2e85f384d61cd3b0b6d",
         "type": "github"
       },
       "original": {
@@ -20,13 +20,34 @@
         "type": "github"
       }
     },
+    "mitos": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1794179038,
+        "narHash": "sha256-vOWgeidfRGg4pP/n28wzgJQJKnZa2zNpb+c/PSRWDRw=",
+        "owner": "mitos-editor",
+        "repo": "mitos",
+        "rev": "3661b8751ef1717ad98a81f8cb0534982eae724f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "mitos-editor",
+        "ref": "v0.2.0",
+        "repo": "mitos",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1792773339,
-        "narHash": "sha256-rZLrzrC6i+jnTAlvPZHogKDulY7WWDEv9hJeHieO7Zw=",
+        "lastModified": 1794042290,
+        "narHash": "sha256-ziZn2PvCJE5JEEpqTdxXwJpPB+L3YqoCpTAMCzyaP3U=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "3ec636362e1816bc2f0888fa0fa2c69f1bc9e504",
+        "rev": "f4a03c008967841f2a0b3cb7c436fc6fc31671f6",
         "type": "github"
       },
       "original": {
@@ -55,11 +76,11 @@
     "python-analytics-skills": {
       "flake": false,
       "locked": {
-        "lastModified": 1791151656,
-        "narHash": "sha256-QZn1f6xScjfiyx07/GL+rQKtXUhRuqhQF/N2c02IS2U=",
+        "lastModified": 1793713242,
+        "narHash": "sha256-VraQae7gtJWgc4wQ+gAwGyzUrdQ5ZlukTdTFMLXY09w=",
         "owner": "pymc-labs",
         "repo": "python-analytics-skills",
-        "rev": "68cbe666f361016f585985884502640baf04d875",
+        "rev": "4ebb925b837b428888296304ec78ff8cac6dbe40",
         "type": "github"
       },
       "original": {
@@ -71,6 +92,7 @@
     "root": {
       "inputs": {
         "home-manager": "home-manager",
+        "mitos": "mitos",
         "nixpkgs": "nixpkgs",
         "nixpkgs-stable": "nixpkgs-stable",
         "python-analytics-skills": "python-analytics-skills",
@@ -97,11 +119,11 @@
     "vercel-skills": {
       "flake": false,
       "locked": {
-        "lastModified": 1792442059,
-        "narHash": "sha256-YfWThEnWqsb1Dy3D/2m+VwLZdTjglEocyuD58WlZSrY=",
+        "lastModified": 1794355153,
+        "narHash": "sha256-K4xCSpt8jnkTx8FDEa2cXrzMjpRkYOwTiFqPap6iCYU=",
         "owner": "vercel-labs",
         "repo": "skills",
-        "rev": "a80e4c9d12d607631249d4d7d059f835d4b2f13a",
+        "rev": "e781cb4d07433dfe1d19e924ed45cc61738c55ec",
         "type": "github"
       },
       "original": {
