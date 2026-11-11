@@ -99,8 +99,8 @@ in
       defaultModel = "qwen3.8-27b";
       modelThinkingLevels."litellm/qwen3.8-27b" = "medium";
     } else {
-      defaultProvider = "github-copilot";
-      defaultModel = "gpt-6-luna";
+      defaultProvider = "anthropic";
+      defaultModel = "claude-haiku-4-5";
     }) // {
       compaction = {
         enabled = true;
@@ -174,9 +174,18 @@ in
   home.file."${configDirRelative}/extensions/intelligent-find.ts".source =
     ./pi/extensions/intelligent-find.ts;
 
-  # MCP server config consumed by pi-mcp-adapter.
+  # Pi's shared MCP config is also read by pi-mcp-adapter. Keep it to fields
+  # supported by Pi's mcp.json schema; adapter-only overrides live separately.
   home.file."${configDirRelative}/mcp.json".source =
     jsonFormat.generate "pi-mcp-adapter-mcp.json" mcpConfig;
+
+  # Preserve the home profile's lazy-keep-alive behavior without putting the
+  # adapter-specific lifecycle field into Pi's mcp.json.
+  home.file."${configDirRelative}/mcp-adapter.json" = lib.mkIf (profile == "home") {
+    source = jsonFormat.generate "pi-mcp-adapter-overrides.json" {
+      mcpServers.homeassistant.lifecycle = "lazy-keep-alive";
+    };
+  };
 
   # pi-lsp global server config (see lspConfig above).
   home.file."${configDirRelative}/lsp.json".source =
