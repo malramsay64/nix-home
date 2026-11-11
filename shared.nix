@@ -132,11 +132,16 @@
     lazyjj
     tree
     just
+    herdr
     bottom
     dust
     hyperfine
     jq
-    pqrs
+    # pqrs's zstd-sys dependency probes system zstd through pkg-config.
+    (pqrs.overrideAttrs (old: {
+      nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ pkg-config ];
+      buildInputs = (old.buildInputs or [ ]) ++ [ zstd ];
+    }))
     difftastic
     nixfmt
     mermaid-cli
@@ -300,7 +305,11 @@
         pkgs.prettierd
         pkgs.omnisharp-roslyn
         pkgs.ty
-        pkgs.zizmor
+        # Nixpkgs' aws-lc-sys crate override expects these system dependencies.
+        (pkgs.zizmor.overrideAttrs (old: {
+          nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ pkgs.pkg-config ];
+          buildInputs = (old.buildInputs or [ ]) ++ [ pkgs.aws-lc ];
+        }))
       ];
     };
     jujutsu = {

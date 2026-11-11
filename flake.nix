@@ -21,6 +21,10 @@
       url = "github:pymc-labs/python-analytics-skills";
       flake = false;
     };
+    mitos = {
+      url = "github:mitos-editor/mitos/v0.2.0";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -31,6 +35,7 @@
       vercel-skills,
       superpowers-skills,
       python-analytics-skills,
+      mitos,
       ...
     }:
     let
@@ -47,6 +52,12 @@
           allowUnfree = true;
         };
       };
+      # Mitos' Rust dependency on aws-lc-sys opts into the Nixpkgs system
+      # AWS-LC library. Make those build inputs explicit for the release flake.
+      mitosPackage = mitos.packages.${system}.default.overrideAttrs (old: {
+        nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ pkgs.pkg-config ];
+        buildInputs = (old.buildInputs or [ ]) ++ [ pkgs.aws-lc ];
+      });
       lib = pkgs.lib;
 
       # Each entry: { src = <flake-input>; dir = "path/to/skills/within/repo"; }
@@ -94,6 +105,11 @@
 
     in
     {
+      packages.${system} = {
+        mitos = mitosPackage;
+        default = mitosPackage;
+      };
+
       homeConfigurations."home" = home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
         modules = [
@@ -101,6 +117,9 @@
           ./home.nix
           ./skills.nix
           ./pi.nix
+          {
+            home.packages = [ mitosPackage ];
+          }
         ];
 
         extraSpecialArgs = {
