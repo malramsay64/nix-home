@@ -117,13 +117,10 @@
           ./home.nix
           ./skills.nix
           ./pi.nix
-          {
-            home.packages = [ mitosPackage ];
-          }
         ];
 
         extraSpecialArgs = {
-          inherit availableSkills pkgs-stable;
+          inherit availableSkills pkgs-stable mitosPackage;
           defaultBrowser = "zen";
           profile = "home";
           user = baseUser // { email = "m@malramsay.com"; };
@@ -140,7 +137,7 @@
         ];
 
         extraSpecialArgs = {
-          inherit availableSkills pkgs-stable;
+          inherit availableSkills pkgs-stable mitosPackage;
           defaultBrowser = "wslview";
           profile = "work";
           user = baseUser // { email = "malcolm.ramsay@tiimely.com"; };
