@@ -1,11 +1,50 @@
 {
   pkgs,
   pkgs-stable,
+  mitosPackage,
   user,
   profile,
   config,
   ...
 }:
+let
+  # Language servers and formatters shared by helix and mitos.
+  editorTools = [
+    pkgs.bash-language-server
+    pkgs.docker-compose-language-service
+    pkgs.dockerfile-language-server
+    pkgs.nixd
+    pkgs.terraform-ls
+    pkgs.taplo
+    pkgs.marksman
+    pkgs.tinymist
+    pkgs.shellcheck
+    pkgs.yaml-language-server
+    pkgs.rust-analyzer
+    pkgs.typos-lsp
+    pkgs.harper
+    pkgs.ruff
+    pkgs.prettierd
+    pkgs.omnisharp-roslyn
+    pkgs.ty
+    # Nixpkgs' aws-lc-sys crate override expects these system dependencies.
+    (pkgs.zizmor.overrideAttrs (old: {
+      nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ pkgs.pkg-config ];
+      buildInputs = (old.buildInputs or [ ]) ++ [ pkgs.aws-lc ];
+    }))
+  ];
+
+  # Mitos has no extraPackages option, so put the tools on its PATH directly.
+  mitosWrapped = pkgs.symlinkJoin {
+    name = "mitos-wrapped-${mitosPackage.version}";
+    paths = [ mitosPackage ];
+    nativeBuildInputs = [ pkgs.makeWrapper ];
+    postBuild = ''
+      wrapProgram $out/bin/ms --suffix PATH : ${pkgs.lib.makeBinPath editorTools}
+    '';
+    meta.mainProgram = "ms";
+  };
+in
 {
   # Home Manager needs a bit of information about you and the paths it should
   # manage.
@@ -27,7 +66,12 @@
   home.packages = with pkgs; [
     (writeShellApplication {
       name = "upgrade-everything";
-      runtimeInputs = [ nix uv nodejs config.programs.pi-coding-agent.package ];
+      runtimeInputs = [
+        nix
+        uv
+        nodejs
+        config.programs.pi-coding-agent.package
+      ];
       text = ''
         flake_dir="''${NIX_HOME_FLAKE:-$HOME/projects/nix-home}"
         if [[ ! -d "$flake_dir" ]]; then
@@ -133,6 +177,7 @@
     tree
     just
     herdr
+    mitosWrapped
     bottom
     dust
     hyperfine
@@ -169,6 +214,9 @@
     ".config/alacritty/one_dark.toml".source = config/alacritty/one_dark.toml;
     ".config/helix/config.toml".source = config/helix/config.toml;
     ".config/helix/languages.toml".source = config/helix/languages.toml;
+    ".config/mitos/config.toml".source = config/mitos/config.toml;
+    ".config/mitos/languages.toml".source = config/mitos/languages.toml;
+    ".config/mitos/runtime/dictionaries/en_AU".source = "${pkgs.hunspellDicts.en_AU}/share/hunspell";
     ".config/zellij/config.kdl".source = config/zellij/config.kdl;
     ".config/herdr/config.toml".source = config/herdr/config.toml;
 
@@ -257,15 +305,31 @@
         user.email = user.email;
         user.name = user.name;
         delta.enable = true;
-        aliases = {
+        alias = {
           lol = "log --graph --decorate --pretty=oneline --abbrev-commit";
           lola = "log --graph --decorate --pretty=oneline --abbrev-commit --all";
           ci = "commit";
+          ca = "commit --amend";
+          can = "commit --amend --no-edit";
           co = "checkout";
-          st = "status";
+          st = "status --short --branch";
           br = "branch";
           re = "remote";
           sw = "switch";
+          swc = "switch --create";
+          df = "diff";
+          dfs = "diff --staged";
+          ad = "add";
+          ap = "add --patch";
+          unstage = "restore --staged";
+          last = "log -1 --stat";
+          pf = "push --force-with-lease";
+          pl = "pull --ff-only";
+          rb = "rebase";
+          rbi = "rebase --interactive";
+          cp = "cherry-pick";
+          sta = "stash push";
+          stp = "stash pop";
           gca = "gc --aggressive --prune=now";
         };
         push = {
@@ -292,29 +356,7 @@
     helix = {
       enable = true;
       defaultEditor = true;
-      extraPackages = [
-        pkgs.bash-language-server
-        pkgs.docker-compose-language-service
-        pkgs.dockerfile-language-server
-        pkgs.nixd
-        pkgs.terraform-ls
-        pkgs.taplo
-        pkgs.marksman
-        pkgs.tinymist
-        pkgs.shellcheck
-        pkgs.yaml-language-server
-        pkgs.rust-analyzer
-        pkgs.typos-lsp
-        pkgs.ruff
-        pkgs.prettierd
-        pkgs.omnisharp-roslyn
-        pkgs.ty
-        # Nixpkgs' aws-lc-sys crate override expects these system dependencies.
-        (pkgs.zizmor.overrideAttrs (old: {
-          nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ pkgs.pkg-config ];
-          buildInputs = (old.buildInputs or [ ]) ++ [ pkgs.aws-lc ];
-        }))
-      ];
+      extraPackages = editorTools;
     };
     jujutsu = {
       enable = true;

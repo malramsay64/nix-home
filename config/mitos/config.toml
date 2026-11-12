@@ -1,0 +1,50 @@
+theme = "onedark"
+
+[editor]
+line-number = "relative"
+
+[editor.files.auto-save]
+focus-lost = true
+after-delay.enable = true
+
+[editor.diagnostics.inline]
+cursor-line = "warning"
+
+[editor.diagnostics.end-of-line]
+severity = "hint"
+
+[editor.whitespace.render]
+space = "none"
+newline = "all"
+tab = "all"
+
+[editor.soft-wrap]
+enable = true
+
+[editor.indent-guides]
+render = true
+
+[editor.cursor.shape]
+insert = "bar"
+normal = "block"
+select = "underline"
+
+[editor.lsp]
+
+[editor.lsp.messages]
+enable = true
+
+[editor.diff]
+engine = "syntax"
+
+[editor.inline-blame]
+show = "all-lines"
+
+[editor.spelling]
+languages = ["en_AU"]
+
+[keys.normal]
+"minus" = "file_picker_in_current_buffer_directory"
+
+[keys.insert]
+j = { k = "normal_mode" }
