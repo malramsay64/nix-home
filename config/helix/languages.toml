@@ -7,6 +7,12 @@ tinymist = { command = "tinymist" }
 ty = { command = "ty" }
 zizmor = { command = "zizmor", args = ["--lsp"] }
 
+[language-server.harper-ls]
+command = "harper-ls"
+args = ["--stdio"]
+[language-server.harper-ls.config.harper-ls]
+dialect = "Australian"
+
 [language-server.basedpyright]
 command = "basedpyright-langserver"
 args = ["--stdio"]
@@ -47,20 +53,20 @@ scope = "source.typst"
 file-types = ["typ"]
 auto-format = true
 # formatter = { command = "typstfmt", args = ["--output", "-"] }
-language-servers = ["tinymist", "typos-lsp"]
+language-servers = ["tinymist", "typos-lsp", "harper-ls"]
 
 [[language]]
 name = "markdown"
 scope = "source.md"
 file-types = ["md", "markdown"]
-language-servers = ["marksman", "typos-lsp"]
+language-servers = ["marksman", "typos-lsp", "harper-ls"]
 
 [[language]]
 name = "rust"
 scope = "source.rust"
 file-types = ["rs"]
 auto-format = true
-language-servers = ["rust-analyzer", "typos-lsp"]
+language-servers = ["rust-analyzer", "typos-lsp", "harper-ls"]
 
 [[language]]
 name = "sql"
@@ -74,4 +80,5 @@ name = "python"
 scope = "source.python"
 file-types = ["py", "pyi"]
 auto-format = true
-language-servers = ["ty", "ruff", "typos-lsp"]
+language-servers = ["ty", "ruff", "typos-lsp", "harper-ls"]
+roots = ["ty.toml"]
