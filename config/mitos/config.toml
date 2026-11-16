@@ -7,6 +7,10 @@ line-number = "relative"
 focus-lost = true
 after-delay.enable = true
 
+[editor.files.reload]
+enable = true
+prompt-if-modified = true
+
 [editor.diagnostics.inline]
 cursor-line = "warning"
 
