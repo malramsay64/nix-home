@@ -66,7 +66,7 @@ name = "rust"
 scope = "source.rust"
 file-types = ["rs"]
 auto-format = true
-language-servers = ["rust-analyzer", "typos-lsp", "harper-ls"]
+language-servers = ["rust-analyzer", "typos-lsp"]
 
 [[language]]
 name = "sql"
@@ -80,5 +80,5 @@ name = "python"
 scope = "source.python"
 file-types = ["py", "pyi"]
 auto-format = true
-language-servers = ["ty", "ruff", "typos-lsp", "harper-ls"]
+language-servers = ["ty", "ruff", "typos-lsp"]
 roots = ["ty.toml"]
