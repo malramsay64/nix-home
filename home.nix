@@ -10,7 +10,6 @@
     availableSkills."vercel-labs"."skills"."find-skills"
   ]
   ++ builtins.attrValues availableSkills."awdemos"."opencode-superpowers"
-  ++ builtins.attrValues availableSkills."pymc-labs"."python-analytics-skills"
   ++ [
     {
       name = "gf-df-trip";

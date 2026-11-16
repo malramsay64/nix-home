@@ -2,6 +2,7 @@
   pkgs,
   pkgs-stable,
   mitosPackage,
+  availableSkills,
   user,
   profile,
   config,
@@ -248,6 +249,8 @@ in
   home.sessionVariables = {
     COLORTERM = "truecolor";
   };
+
+  claude.skills = builtins.attrValues availableSkills."pymc-labs"."pymc-modeling";
 
   home.sessionPath = [
     "$HOME/.local/bin"

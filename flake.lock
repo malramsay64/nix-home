@@ -73,19 +73,19 @@
         "type": "github"
       }
     },
-    "python-analytics-skills": {
+    "pymc-modeling-skills": {
       "flake": false,
       "locked": {
         "lastModified": 1793713242,
         "narHash": "sha256-VraQae7gtJWgc4wQ+gAwGyzUrdQ5ZlukTdTFMLXY09w=",
         "owner": "pymc-labs",
-        "repo": "python-analytics-skills",
+        "repo": "pymc-modeling",
         "rev": "4ebb925b837b428888296304ec78ff8cac6dbe40",
         "type": "github"
       },
       "original": {
         "owner": "pymc-labs",
-        "repo": "python-analytics-skills",
+        "repo": "pymc-modeling",
         "type": "github"
       }
     },
@@ -95,7 +95,7 @@
         "mitos": "mitos",
         "nixpkgs": "nixpkgs",
         "nixpkgs-stable": "nixpkgs-stable",
-        "python-analytics-skills": "python-analytics-skills",
+        "pymc-modeling-skills": "pymc-modeling-skills",
         "superpowers-skills": "superpowers-skills",
         "vercel-skills": "vercel-skills"
       }

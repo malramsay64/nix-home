@@ -17,8 +17,8 @@
       url = "github:awdemos/opencode-superpowers";
       flake = false;
     };
-    python-analytics-skills = {
-      url = "github:pymc-labs/python-analytics-skills";
+    pymc-modeling-skills = {
+      url = "github:pymc-labs/pymc-modeling";
       flake = false;
     };
     mitos = {
@@ -34,7 +34,7 @@
       home-manager,
       vercel-skills,
       superpowers-skills,
-      python-analytics-skills,
+      pymc-modeling-skills,
       mitos,
       ...
     }:
@@ -70,8 +70,8 @@
           src = superpowers-skills;
           dir = "skills";
         };
-        "pymc-labs"."python-analytics-skills" = {
-          src = python-analytics-skills;
+        "pymc-labs"."pymc-modeling" = {
+          src = pymc-modeling-skills;
           dir = "skills";
         };
       };
