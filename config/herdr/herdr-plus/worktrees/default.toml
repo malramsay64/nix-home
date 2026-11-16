@@ -1,0 +1,20 @@
+# Applied to every new or opened worktree: editor | (claude over shell).
+repo = "*"
+
+[[tabs]]
+name = "dev"
+
+[[tabs.panes]]
+label = "Editor"
+command = "ms ."
+
+[[tabs.panes]]
+label = "Claude"
+command = "claude"
+split = "right"
+ratio = 0.35
+
+[[tabs.panes]]
+label = "Shell"
+split = "down"
+ratio = 0.3

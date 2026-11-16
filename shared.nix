@@ -219,6 +219,8 @@ in
     ".config/mitos/runtime/dictionaries/en_AU".source = "${pkgs.hunspellDicts.en_AU}/share/hunspell";
     ".config/zellij/config.kdl".source = config/zellij/config.kdl;
     ".config/herdr/config.toml".source = config/herdr/config.toml;
+    ".config/herdr/plugins/config/cloudmanic.herdr-plus/worktrees/default.toml".source =
+      config/herdr/herdr-plus/worktrees/default.toml;
 
     # # You can also set the file content immediately.
     # ".gradle/gradle.properties".text = ''
