@@ -118,11 +118,11 @@ in
           uv cache clean mcp-nixos ha-mcp awslabs.core-mcp-server
         }
 
-        upgrade_determinate_nix() {
+        upgrade_nix() {
           if command -v determinate-nixd >/dev/null 2>&1; then
-            /usr/bin/sudo "$(command -v determinate-nixd)" upgrade
+            /usr/bin/sudo "$(command -v nix)" upgrade-nix
           else
-            echo "Determinate Nix not detected; skipping the Nix installation upgrade."
+            echo "Nix not detected; skipping the Nix installation upgrade."
           fi
         }
 
