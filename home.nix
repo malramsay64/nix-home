@@ -31,6 +31,7 @@
     # # "Hello, world!" when run.
     # pkgs.hello
     pkgs.helmfile
+    pkgs.rapidraw
 
     pkgs.immich-go
     pkgs.k9s
