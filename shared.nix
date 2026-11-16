@@ -198,6 +198,7 @@ in
     exiftool
     pandoc
     betterleaks
+    prek
 
     # Development
     # opencode
