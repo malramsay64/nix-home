@@ -264,6 +264,15 @@ in
     # (e.g. in home.nix).
     claude-code = {
       enable = true;
+      context = ''
+        # Commits
+
+        All commits must follow Conventional Commits 1.0.0:
+        `<type>(<optional scope>): <description>`, with an optional body and footers.
+        Types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert.
+        Use `!` after the type/scope or a `BREAKING CHANGE:` footer for breaking changes.
+        Write the description in the imperative mood, lowercase, no trailing period.
+      '';
       settings = {
         theme = "auto";
         tui = "fullscreen";
