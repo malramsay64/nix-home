@@ -1,0 +1,10 @@
+id = "local.default-layout"
+name = "Default layout"
+version = "0.1.0"
+min_herdr_version = "0.7.0"
+description = "Editor over shell on the left, Claude Code on the right"
+platforms = ["linux"]
+
+[[events]]
+on = "workspace.created"
+command = ["sh", "layout.sh"]
