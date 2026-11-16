@@ -199,7 +199,7 @@ in
     betterleaks
 
     # Development
-    opencode
+    # opencode
   ];
   fonts.fontconfig.enable = true;
 
@@ -257,7 +257,31 @@ in
   programs = {
     # Profile-specific MCP servers are added via programs.claude-code.mcpServers
     # (e.g. in home.nix).
-    claude-code.enable = true;
+    claude-code = {
+      enable = true;
+      settings = {
+        theme = "auto";
+        tui = "fullscreen";
+        attribution = {
+          commit = "";
+          pr = "";
+        };
+        # Reports session state to herdr. The script itself is written by
+        # `herdr integration install claude` and lives outside nix.
+        hooks.SessionStart = [
+          {
+            matcher = "^(startup|resume|clear|compact|fork)$";
+            hooks = [
+              {
+                type = "command";
+                command = "bash \"$HOME/.claude/hooks/herdr-agent-state.sh\" session";
+                timeout = 10;
+              }
+            ];
+          }
+        ];
+      };
+    };
 
     home-manager.enable = true;
     ssh = {
