@@ -9,6 +9,17 @@
   ...
 }:
 let
+  atuinHook = {
+    matcher = "Bash";
+    hooks = [
+      {
+        type = "command";
+        command = "atuin hook claude-code";
+        timeout = 5;
+      }
+    ];
+  };
+
   # Language servers and formatters shared by helix and mitos.
   editorTools = [
     pkgs.bash-language-server
@@ -170,9 +181,7 @@ in
 
     # Core Tools
     iosevka
-    uv
     duckdb
-    zellij
     typst
     lazyjj
     tree
@@ -295,6 +304,13 @@ in
             ];
           }
         ];
+        # Atuin's native agent integration (equivalent to
+        # `atuin hook install claude-code`, which can't write to the
+        # nix-managed settings.json): records each Bash command Claude runs,
+        # tagged as an agent, with its exit code and duration.
+        hooks.PreToolUse = [ atuinHook ];
+        hooks.PostToolUse = [ atuinHook ];
+        hooks.PostToolUseFailure = [ atuinHook ];
       };
     };
 
