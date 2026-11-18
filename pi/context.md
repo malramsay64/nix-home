@@ -2,17 +2,26 @@
 
 ## Version control
 
-This user manages source control with [Jujutsu (`jj`)](https://jj-vcs.github.io/jj/),
-not raw `git`, even in repositories that are backed by a git store.
+Use `git` for all version control operations: viewing status/diffs/log,
+creating commits, branching, and pushing. Don't use `jj`, even in
+repositories that have a `.jj` directory, unless the user asks for it.
 
-- Use `jj` commands for all version control operations: creating commits,
-  viewing status/diffs/log, branching, and pushing.
-- To record work, use `jj commit -m "..."` (or `jj describe -m "..."` on the
-  current change followed by `jj new`), not `git commit`.
-- Use `jj st` / `jj diff` / `jj log` instead of `git status` / `git diff` /
-  `git log`.
-- Only fall back to `git` directly if `jj` is unavailable in the repository,
-  or the user explicitly asks for a raw git command.
+- Commit or push only when the user asks. If on the default branch, create a
+  branch first.
+- Stage specific files (`git add <path>`) rather than `git add -A`, so
+  unrelated changes aren't swept into a commit.
+- Use non-interactive commands; interactive flags such as `git rebase -i` and
+  `git add -p` don't work in this environment.
+- On a branch other than the default branch, you may tidy its history
+  (amend, fixup, squash, reorder with a non-interactive rebase, and
+  `git push --force-with-lease`), but confirm with the user before each
+  rewrite. Never rewrite history on the default branch.
+
+All commits must follow Conventional Commits 1.0.0:
+`<type>(<optional scope>): <description>`, with an optional body and footers.
+Types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert.
+Use `!` after the type/scope or a `BREAKING CHANGE:` footer for breaking changes.
+Write the description in the imperative mood, lowercase, no trailing period.
 
 ## Context usage
 
