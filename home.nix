@@ -1,10 +1,22 @@
-{
-  pkgs,
-  availableSkills,
-  lib,
-  ...
-}:
+{ pkgs, availableSkills, ... }:
+let
+  trekUrl = "https://trek.malramsay.com/mcp";
 
+  # Secrets for MCP servers are injected per-server with `op run` (1Password
+  # desktop app auth, so first use prompts for approval). Only the op://
+  # secret references live in the nix store; the resolved values exist solely
+  # in the MCP server's process, never in pi's environment or the agent's
+  # bash tool. https://www.1password.dev/get-started/secure-ai-access
+  opRun = envFile: command: {
+    command = "op";
+    args = [
+      "run"
+      "--env-file=${envFile}"
+      "--"
+    ]
+    ++ command;
+  };
+in
 {
   claude.skills = [
     availableSkills."vercel-labs"."skills"."find-skills"
@@ -17,44 +29,86 @@
     }
   ];
 
+  home.packages = with pkgs; [
+    helmfile
+    rapidraw
+    immich-go
+    k9s
+    argocd
+    zola
+    wrangler
+    llama-cpp-rocm
+  ];
+
   # Delivered by home-manager as a generated personal plugin, so it lives
   # alongside (not inside) the mutable ~/.claude.json.
   programs.claude-code.mcpServers.trek = {
     type = "http";
-    url = "https://trek.malramsay.com/mcp";
+    url = trekUrl;
   };
 
-  # The home.packages option allows you to install Nix packages into your
-  # environment.
-  home.packages = [
-    # # Adds the 'hello' command to your environment. It prints a friendly
-    # # "Hello, world!" when run.
-    # pkgs.hello
-    pkgs.helmfile
-    pkgs.rapidraw
+  pi.mcpServers = {
+    trek.url = trekUrl;
+    # https://github.com/homeassistant-ai/ha-mcp
+    homeassistant =
+      opRun
+        (pkgs.writeText "homeassistant-mcp.env" ''
+          HOMEASSISTANT_TOKEN="op://Homelab/Home Assistant/mcp-token"
+        '')
+        [
+          "uvx"
+          "ha-mcp@latest"
+        ]
+      // {
+        env.HOMEASSISTANT_URL = "https://homeassistant.malramsay.com";
+      };
+  };
+  pi.mcpAdapterOverrides.homeassistant.lifecycle = "lazy-keep-alive";
 
-    pkgs.immich-go
-    pkgs.k9s
-    pkgs.argocd
+  programs.pi-coding-agent = {
+    # Custom model providers (LiteLLM proxy). The proxy is homelab
+    # infrastructure and its key comes from 1Password.
+    models = import ./pi/models.nix;
+    settings = {
+      defaultProvider = "litellm";
+      defaultModel = "qwen3.8-27b";
+      modelThinkingLevels."litellm/qwen3.8-27b" = "medium";
+      # Qwen3.8 only has a 64K window (see pi/models.nix): compact later and
+      # keep less verbatim so more of it is left for work between compactions.
+      compaction.modelOverrides."litellm/qwen3.8-27b" = {
+        reserveTokens = 12288;
+        keepRecentTokens = 12000;
+      };
+    };
+  };
 
-    pkgs.zola
-    pkgs.wrangler
-    pkgs.llama-cpp-rocm
-    # # It is sometimes useful to fine-tune packages, for example, by applying
-    # # overrides. You can do that directly here, just don't forget the
-    # # parentheses. Maybe you want to install Nerd Fonts with a limited number of
-    # # fonts?
-    # (pkgs.nerdfonts.override { fonts = [ "FantasqueSansMono" ]; })
+  programs.ssh.settings = {
+    # Cluster
+    "k3s-node-01" = {
+      HostName = "192.168.10.26";
+      User = "core";
+      IdentityFile = "~/.ssh/id_ed25519";
+    };
+    "k3s-syn-01" = {
+      HostName = "192.168.10.27";
+      User = "core";
+      IdentityFile = "~/.ssh/id_ed25519";
+    };
 
-    # # You can also create simple shell scripts directly inside your
-    # # configuration. For example, this adds a command 'my-hello' to your
-    # # environment:
-    # (pkgs.writeShellScriptBin "my-hello" ''
-    #   echo "Hello, ${config.home.username}!"
-    # '')
-  ];
+    # Home
+    "hamilton" = {
+      HostName = "192.168.10.10";
+      User = "ironmal";
+      Port = 29979;
+      IdentityFile = "~/.ssh/id_ed25519";
+      SetEnv.TERM = "xterm-256color";
+    };
 
-  programs = {
-    ssh = import ./hosts.nix;
+    # Git
+    "git.malramsay.com" = {
+      HostName = "git.malramsay.com";
+      User = "git";
+      IdentityFile = "~/.ssh/id_ed25519";
+    };
   };
 }

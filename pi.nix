@@ -1,203 +1,211 @@
-{ pkgs, lib, config, profile, ... }:
+{
+  pkgs,
+  lib,
+  config,
+  ...
+}:
 let
   cfg = config.programs.pi-coding-agent;
-  # configDir is an absolute path (defaults to ~/.pi/agent); home.file needs
-  # a path relative to $HOME.
-  configDirRelative =
-    lib.removePrefix "${config.home.homeDirectory}/" cfg.configDir;
-
   jsonFormat = pkgs.formats.json { };
-
-  mcpConfig = import ./pi/mcp.nix { inherit pkgs profile; };
-  modelsConfig = import ./pi/models.nix { inherit config; };
 
   # pi-lsp server config, written to <configDir>/lsp.json (global config,
   # trusted automatically). Python is wired to `ruff server` (lint/format
-  # diagnostics) and `ty server` (Astral's type checker, also LSP-capable) --
-  # both ship with their own language server, so pi-lsp can drive them
-  # directly instead of going through pyright/mypy. Both are launched via
+  # diagnostics) and `ty server` (Astral's type checker). Both are launched via
   # `uv run` so pi-lsp resolves each project's own pinned ruff/ty version
   # (as declared in its pyproject.toml/uv.lock) rather than a global one;
   # `uv` itself comes from extraPackages below.
+  mkUvPythonLsp =
+    {
+      id,
+      rootMarkers,
+      diagnosticsWaitMs,
+    }:
+    {
+      inherit id rootMarkers diagnosticsWaitMs;
+      enabled = true;
+      include = [
+        "**/*.py"
+        "**/*.pyi"
+      ];
+      bin = "uv";
+      args = [
+        "run"
+        id
+        "server"
+      ];
+      cwd = "{root}";
+      languageIdByExtension = {
+        ".py" = "python";
+        ".pyi" = "python";
+      };
+      startupTimeoutMs = 45000;
+      initializationOptions = { };
+      settings = { };
+    };
+
   lspConfig = {
     version = 1;
     servers = [
-      {
+      (mkUvPythonLsp {
         id = "ruff";
-        enabled = true;
-        include = [ "**/*.py" "**/*.pyi" ];
-        rootMarkers = [ "pyproject.toml" "uv.lock" "setup.py" "requirements.txt" ];
-        bin = "uv";
-        args = [ "run" "ruff" "server" ];
-        cwd = "{root}";
-        languageIdByExtension = { ".py" = "python"; ".pyi" = "python"; };
-        startupTimeoutMs = 45000;
+        rootMarkers = [
+          "pyproject.toml"
+          "uv.lock"
+          "setup.py"
+          "requirements.txt"
+        ];
         diagnosticsWaitMs = 1500;
-        initializationOptions = { };
-        settings = { };
-      }
-      {
+      })
+      (mkUvPythonLsp {
         id = "ty";
-        enabled = true;
-        include = [ "**/*.py" "**/*.pyi" ];
-        rootMarkers = [ "pyproject.toml" "uv.lock" ];
-        bin = "uv";
-        args = [ "run" "ty" "server" ];
-        cwd = "{root}";
-        languageIdByExtension = { ".py" = "python"; ".pyi" = "python"; };
-        startupTimeoutMs = 45000;
+        rootMarkers = [
+          "pyproject.toml"
+          "uv.lock"
+        ];
         diagnosticsWaitMs = 2000;
-        initializationOptions = { };
-        settings = { };
-      }
+      })
     ];
   };
+
+  mcpServerType = lib.types.attrsOf jsonFormat.type;
 in
 {
-  programs.pi-coding-agent = {
-    enable = true;
+  options.pi = {
+    mcpServers = lib.mkOption {
+      type = mcpServerType;
+      default = { };
+      description = ''
+        MCP servers written to <configDir>/mcp.json, read by both Pi and
+        pi-mcp-adapter. Keep entries to fields in Pi's mcp.json schema.
+      '';
+    };
+    mcpAdapterOverrides = lib.mkOption {
+      type = mcpServerType;
+      default = { };
+      description = ''
+        pi-mcp-adapter-only per-server fields (e.g. lifecycle), written to
+        <configDir>/mcp-adapter.json so they stay out of Pi's mcp.json.
+      '';
+    };
+  };
 
-    # Tools available on PATH to the pi agent itself (bash tool, packages it
-    # installs via `pi packages add`, MCP adapters, etc). Chosen to cover
-    # infrastructure, data science, and backend API workflows.
-    extraPackages = with pkgs; [
-      # JS/TS runtime needed for npm: packages pi can install (e.g. MCP
-      # adapters, termdraw) and for backend API dev/debugging.
-      nodejs
-      bun
+  config = {
+    # Servers shared by every profile; profiles add their own in home.nix/work.nix.
+    pi.mcpServers = {
+      github.url = "https://api.githubcopilot.com/mcp/";
+      kubernetes = {
+        command = "npx";
+        args = [
+          "-y"
+          "mcp-server-kubernetes"
+        ];
+      };
+      nixos = {
+        command = "uvx";
+        args = [ "mcp-nixos" ];
+      };
+      context7 = {
+        command = "npx";
+        args = [
+          "-y"
+          "@upstash/context7-mcp"
+        ];
+      };
+    };
 
-      # Infrastructure / ops
-      kubectl
-      kubernetes-helm
-      terraform
-      awscli2
-      jq
-      yq-go
-      httpie
+    programs.pi-coding-agent = {
+      enable = true;
 
-      # Data science / data engineering
-      uv
-      # ruff/ty on PATH as a fallback for ad-hoc `bash` use outside a
-      # uv-managed project; the pi-lsp servers above run each project's own
-      # pinned versions via `uv run` instead of these.
-      ruff
-      ty
-      duckdb
-      ripgrep
-      fd
+      # Tools available on PATH to the pi agent itself (bash tool, packages it
+      # installs via `pi packages add`, MCP adapters, etc). Chosen to cover
+      # infrastructure, data science, and backend API workflows.
+      extraPackages = with pkgs; [
+        # JS/TS runtime needed for npm: packages pi can install (e.g. MCP
+        # adapters, termdraw) and for backend API dev/debugging.
+        nodejs
+        bun
 
-      # Version control used by the agent for commits (see context.md).
-      jujutsu
+        # Infrastructure / ops
+        kubectl
+        kubernetes-helm
+        terraform
+        awscli2
+        jq
+        yq-go
+        httpie
 
-    ];
+        # Data science / data engineering
+        uv
+        # ruff/ty on PATH as a fallback for ad-hoc `bash` use outside a
+        # uv-managed project; the pi-lsp servers above run each project's own
+        # pinned versions via `uv run` instead of these.
+        ruff
+        ty
+        duckdb
+        ripgrep
+        fd
 
-    settings = {
-      theme = "dark";
-    } // (if profile == "home" then {
-      # Self-hosted via the LiteLLM proxy in models.json (home only).
-      defaultProvider = "litellm";
-      defaultModel = "qwen3.8-27b";
-      modelThinkingLevels."litellm/qwen3.8-27b" = "medium";
-    } else {
-      defaultProvider = "anthropic";
-      defaultModel = "claude-haiku-4-5";
-    }) // {
-      compaction = {
-        enabled = true;
-        # Qwen3.8 only has a 64K window (see pi/models.nix): compact later and
-        # keep less verbatim so more of it is left for work between compactions.
-        modelOverrides."litellm/qwen3.8-27b" = {
-          reserveTokens = 12288;
-          keepRecentTokens = 12000;
+        # Version control used by the agent for commits (see context.md).
+        jujutsu
+      ];
+
+      # Profile-specific provider/model defaults live in home.nix and work.nix.
+      settings = {
+        theme = "dark";
+        compaction.enabled = true;
+        retry = {
+          enabled = true;
+          maxRetries = 3;
         };
-      };
-      retry = {
-        enabled = true;
-        maxRetries = 3;
+
+        # pi-subagents uses fresh context by default, while its builtin agents
+        # still inherit repository instructions. Keep that behavior explicit so
+        # children don't accidentally rely on unrelated parent conversation.
+        subagents.defaultSubagentContext = "fresh";
+
+        # pi-lsp: LSP diagnostics and navigation tools exposed to the agent.
+        #   https://www.npmjs.com/package/pi-lsp
+        # pi-mcp-adapter: connect pi to MCP servers.
+        #   https://www.npmjs.com/package/pi-mcp-adapter
+        # pi-subagents: dispatch subagents via a `subagent` tool.
+        #   https://www.npmjs.com/package/pi-subagents
+        # Disabled: superpowers (git:github.com/obra/superpowers), pi-lens.
+        packages = [
+          "npm:pi-lsp"
+          "npm:pi-mcp-adapter"
+          # Pin the extension so declarative installs are reproducible.
+          "npm:pi-subagents@0.81.0"
+          "npm:pi-web-access"
+        ];
+
+        # Locally managed extensions (installed below). pi-mcp-adapter supplies
+        # its own /mcp command, so disable Pi's built-in MCP extension to avoid
+        # loading two extensions that register /mcp.
+        extensions = [
+          "-builtin:mcp"
+          "extensions/permission-gate.ts"
+          "extensions/intelligent-find.ts"
+        ];
       };
 
-      # pi-subagents uses fresh context by default, while its builtin agents
-      # still inherit repository instructions. Keep that behavior explicit so
-      # children don't accidentally rely on unrelated parent conversation.
-      subagents = {
-        defaultSubagentContext = "fresh";
-      };
-
-      # Superpowers: a structured development methodology (brainstorming ->
-      # planning -> TDD -> review) shipped as a pi package.
-      # https://github.com/obra/superpowers
-      #
-      # pi-lsp: LSP diagnostics and language-server navigation tools
-      # (go-to-definition, references, hover, rename, etc.) exposed to the
-      # agent as tools. https://www.npmjs.com/package/pi-lsp
-      #
-      # pi-mcp-adapter: lets pi connect to Model Context Protocol (MCP)
-      # servers as an extension. https://www.npmjs.com/package/pi-mcp-adapter
-      #
-      # pi-subagents: dispatch subagents (single-agent, chain, parallel,
-      # async, forked-context, resume/status workflows) via a `subagent`
-      # tool. https://www.npmjs.com/package/pi-subagents
-      #
-      # pi-lens: real-time code feedback (LSP, linters, formatters,
-      # type-checking, structural analysis via ast-grep/jscpd/knip/etc.).
-      # https://www.npmjs.com/package/pi-lens
-      packages = [
-        # "git:github.com/obra/superpowers"
-        "npm:pi-lsp"
-        "npm:pi-mcp-adapter"
-        # Pin the extension so declarative installs are reproducible.
-        "npm:pi-subagents@0.81.0"
-        "npm:pi-web-access"
-        # "npm:pi-lens"
-      ];
-
-      # Locally managed extensions, e.g. the permission-gate extension below
-      # that asks for confirmation before running dangerous bash commands.
-      # pi-mcp-adapter supplies its own /mcp command, so disable Pi's built-in
-      # MCP extension to avoid loading two extensions that register /mcp.
-      extensions = [
-        "-builtin:mcp"
-        "extensions/permission-gate.ts"
-        "extensions/intelligent-find.ts"
-      ];
+      # Global instructions written to <configDir>/AGENTS.md.
+      context = ./pi/context.md;
     };
 
-    # Global instructions written to ~/.pi/agent/AGENTS.md, e.g. telling the
-    # agent to use `jj` rather than `git` for version control.
-    context = ./pi/context.md;
-  };
-
-  # Extensions referenced by programs.pi-coding-agent.settings.extensions
-  # above, resolved relative to programs.pi-coding-agent.configDir.
-  home.file."${configDirRelative}/extensions/permission-gate.ts".source =
-    ./pi/extensions/permission-gate.ts;
-  home.file."${configDirRelative}/extensions/intelligent-find.ts".source =
-    ./pi/extensions/intelligent-find.ts;
-
-  # Pi's shared MCP config is also read by pi-mcp-adapter. Keep it to fields
-  # supported by Pi's mcp.json schema; adapter-only overrides live separately.
-  home.file."${configDirRelative}/mcp.json".source =
-    jsonFormat.generate "pi-mcp-adapter-mcp.json" mcpConfig;
-
-  # Preserve the home profile's lazy-keep-alive behavior without putting the
-  # adapter-specific lifecycle field into Pi's mcp.json.
-  home.file."${configDirRelative}/mcp-adapter.json" = lib.mkIf (profile == "home") {
-    source = jsonFormat.generate "pi-mcp-adapter-overrides.json" {
-      mcpServers.homeassistant.lifecycle = "lazy-keep-alive";
-    };
-  };
-
-  # pi-lsp global server config (see lspConfig above).
-  home.file."${configDirRelative}/lsp.json".source =
-    jsonFormat.generate "pi-lsp-lsp.json" lspConfig;
-
-  # User-level skills, discovered from <configDir>/skills/.
-  home.file."${configDirRelative}/skills/gf-df-trip".source =
-    ./pi/skills/gf-df-trip;
-
-  # Custom model providers (LiteLLM proxy) consumed by pi directly. Home only:
-  # the proxy is homelab infrastructure and its key comes from 1Password.
-  home.file."${configDirRelative}/models.json" = lib.mkIf (profile == "home") {
-    source = jsonFormat.generate "pi-models.json" modelsConfig;
+    home.file = lib.mapAttrs' (name: value: lib.nameValuePair "${cfg.configDir}/${name}" value) (
+      {
+        "extensions/permission-gate.ts".source = ./pi/extensions/permission-gate.ts;
+        "extensions/intelligent-find.ts".source = ./pi/extensions/intelligent-find.ts;
+        "mcp.json".source = jsonFormat.generate "pi-mcp.json" { mcpServers = config.pi.mcpServers; };
+        "lsp.json".source = jsonFormat.generate "pi-lsp.json" lspConfig;
+        # User-level skills, discovered from <configDir>/skills/.
+        "skills/gf-df-trip".source = ./pi/skills/gf-df-trip;
+      }
+      // lib.optionalAttrs (config.pi.mcpAdapterOverrides != { }) {
+        "mcp-adapter.json".source = jsonFormat.generate "pi-mcp-adapter.json" {
+          mcpServers = config.pi.mcpAdapterOverrides;
+        };
+      }
+    );
   };
 }

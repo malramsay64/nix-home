@@ -1,7 +1,6 @@
 {
   pkgs,
-  pkgs-stable,
-  mitosPackage,
+  lib,
   availableSkills,
   user,
   profile,
@@ -20,7 +19,8 @@ let
     ];
   };
 
-  # Language servers and formatters shared by helix and mitos.
+  # Language servers and formatters used by helix, mitos and Claude Code
+  # (see config/languages.toml and programs.claude-code.lspServers).
   editorTools = [
     pkgs.bash-language-server
     pkgs.docker-compose-language-service
@@ -39,215 +39,88 @@ let
     pkgs.prettierd
     pkgs.omnisharp-roslyn
     pkgs.ty
-    # Nixpkgs' aws-lc-sys crate override expects these system dependencies.
-    (pkgs.zizmor.overrideAttrs (old: {
-      nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ pkgs.pkg-config ];
-      buildInputs = (old.buildInputs or [ ]) ++ [ pkgs.aws-lc ];
-    }))
+    pkgs.zizmor
   ];
 
-  # Mitos has no extraPackages option, so put the tools on its PATH directly.
-  mitosWrapped = pkgs.symlinkJoin {
-    name = "mitos-wrapped-${mitosPackage.version}";
-    paths = [ mitosPackage ];
-    nativeBuildInputs = [ pkgs.makeWrapper ];
-    postBuild = ''
-      wrapProgram $out/bin/ms --suffix PATH : ${pkgs.lib.makeBinPath editorTools}
-    '';
-    meta.mainProgram = "ms";
+  # Package names of the one-shot MCP servers started through `launcher`
+  # (npx/uvx, possibly behind `op run`), with any @version suffix removed, so
+  # upgrade-everything can drop their cached copies.
+  mcpPackages =
+    launcher:
+    lib.unique (
+      lib.concatMap (
+        server:
+        let
+          argv = [ (server.command or "") ] ++ (server.args or [ ]);
+          idx = lib.lists.findFirstIndex (arg: arg == launcher) null argv;
+          rest = if idx == null then [ ] else lib.filter (arg: !lib.hasPrefix "-" arg) (lib.drop (idx + 1) argv);
+        in
+        lib.optional (rest != [ ]) (lib.head (builtins.match "(@?[^@]+)(@.*)?" (lib.head rest)))
+      ) (lib.attrValues config.pi.mcpServers)
+    );
+
+  upgradeEverything = pkgs.writeShellApplication {
+    name = "upgrade-everything";
+    runtimeInputs = [
+      pkgs.nix
+      pkgs.uv
+      pkgs.nodejs
+      config.programs.pi-coding-agent.package
+    ];
+    text = ''
+      profile=${lib.escapeShellArg profile}
+      npx_mcp_packages=(${lib.escapeShellArgs (mcpPackages "npx")})
+      uvx_mcp_packages=(${lib.escapeShellArgs (mcpPackages "uvx")})
+    ''
+    + builtins.readFile ./scripts/upgrade-everything.sh;
   };
 in
 {
-  # Home Manager needs a bit of information about you and the paths it should
-  # manage.
   home.username = user.username;
   home.homeDirectory = user.home;
 
-  # This value determines the Home Manager release that your configuration is
-  # compatible with. This helps avoid breakage when a new Home Manager release
-  # introduces backwards incompatible changes.
-  #
-  # You should not change this value, even if you update Home Manager. If you do
-  # want to update the value, then make sure to first check the Home Manager
-  # release notes.
-  home.stateVersion = "24.11"; # Please read the comment before changing.
+  # Don't change this, even when updating Home Manager, without first checking
+  # the Home Manager release notes.
+  home.stateVersion = "24.11";
 
-  # The home.packages option allows you to install Nix packages into your
-  # environment.
+  home.packages =
+    with pkgs;
+    [
+      upgradeEverything
 
-  home.packages = with pkgs; [
-    (writeShellApplication {
-      name = "upgrade-everything";
-      runtimeInputs = [
-        nix
-        uv
-        nodejs
-        config.programs.pi-coding-agent.package
-      ];
-      text = ''
-        flake_dir="''${NIX_HOME_FLAKE:-$HOME/projects/nix-home}"
-        if [[ ! -d "$flake_dir" ]]; then
-          echo "Nix Home flake directory not found: $flake_dir" >&2
-          echo "Set NIX_HOME_FLAKE to the checkout directory and retry." >&2
-          exit 2
-        fi
-
-        failures=()
-        run_step() {
-          local name="$1"
-          shift
-          printf '\n==> %s\n' "$name"
-          if "$@"; then
-            printf '    completed: %s\n' "$name"
-          else
-            local status=$?
-            printf '    FAILED (%s): %s\n' "$status" "$name" >&2
-            failures+=("$name")
-          fi
-        }
-
-        upgrade_uv_tools() {
-          uv tool upgrade --all
-          uv python upgrade
-        }
-
-        upgrade_pi_extensions() {
-          pi update --extensions
-        }
-
-        refresh_mcp_tool_caches() {
-          local entry key
-          while IFS= read -r entry; do
-            key="''${entry%%:*}"
-            if [[ "$key" =~ ^[[:xdigit:]]+$ ]]; then
-              case "$entry" in
-                *mcp-server-kubernetes*|*@upstash/context7-mcp*|*@aikidosec/mcp*)
-                  npm cache npx rm "$key" || return $?
-                  ;;
-              esac
-            fi
-          done < <(npm cache npx ls)
-
-          uv cache clean mcp-nixos ha-mcp awslabs.core-mcp-server
-        }
-
-        upgrade_nix() {
-          if command -v determinate-nixd >/dev/null 2>&1; then
-            /usr/bin/sudo "$(command -v nix)" upgrade-nix
-          else
-            echo "Nix not detected; skipping the Nix installation upgrade."
-          fi
-        }
-
-        upgrade_nix_and_home_manager() {
-          (cd "$flake_dir" && nix flake update) && \
-            home-manager switch --flake "$flake_dir#${profile}"
-        }
-
-        ${
-          if profile == "work" then
-            ''
-              upgrade_apt() {
-                /usr/bin/sudo apt-get update && /usr/bin/sudo apt-get upgrade -y
-              }
-
-              upgrade_winget() {
-                winget.exe upgrade --all --accept-source-agreements --accept-package-agreements
-              }
-
-              open_windows_update() {
-                powershell.exe -NoProfile -Command "Start-Process 'ms-settings:windowsupdate'"
-              }
-
-              run_step "Ubuntu system packages (apt)" upgrade_apt
-              run_step "Windows packages (winget)" upgrade_winget
-              run_step "Open Windows Update settings" open_windows_update
-            ''
-          else
-            ""
-        }
-        run_step "uv tools" upgrade_uv_tools
-        run_step "Pi packages" upgrade_pi_extensions
-        run_step "Refresh one-shot MCP tool caches" refresh_mcp_tool_caches
-        run_step "Determinate Nix installation" upgrade_determinate_nix
-        run_step "Nix flake inputs and Home Manager" upgrade_nix_and_home_manager
-
-        if (( ''${#failures[@]} )); then
-          printf '\nUpgrade finished with failures: %s\n' "''${failures[*]}" >&2
-          exit 1
-        fi
-        printf '\nAll upgrades completed successfully.\n'
-      '';
-    })
-
-    # Core Tools
-    iosevka
-    duckdb
-    typst
-    lazyjj
-    tree
-    just
-    mitosWrapped
-    dust
-    hyperfine
-    # pqrs's zstd-sys dependency probes system zstd through pkg-config.
-    (pqrs.overrideAttrs (old: {
-      nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ pkg-config ];
-      buildInputs = (old.buildInputs or [ ]) ++ [ zstd ];
-    }))
-    nixfmt
-    mermaid-cli
-    prettier
-    prettier-plugin-jinja-template
-    nodejs
-    exiftool
-    betterleaks
-    prek
-
-    # Development
-    # opencode
-  ];
+      # Core Tools
+      iosevka
+      duckdb
+      typst
+      lazyjj
+      tree
+      just
+      mitos
+      dust
+      hyperfine
+      pqrs
+      nixfmt
+      mermaid-cli
+      prettier
+      prettier-plugin-jinja-template
+      nodejs
+      exiftool
+      betterleaks
+      prek
+    ]
+    ++ editorTools;
   fonts.fontconfig.enable = true;
 
-  # Home Manager is pretty good at managing dotfiles. The primary way to manage
-  # plain files is through 'home.file'.
   home.file = {
-    # # Building this configuration will create a copy of 'dotfiles/screenrc' in
-    # # the Nix store. Activating the configuration will then make '~/.screenrc' a
-    # # symlink to the Nix store copy.
-    # ".screenrc".source = dotfiles/screenrc;
     ".config/helix/config.toml".source = config/helix/config.toml;
-    ".config/helix/languages.toml".source = config/helix/languages.toml;
+    ".config/helix/languages.toml".source = config/languages.toml;
     ".config/mitos/config.toml".source = config/mitos/config.toml;
-    ".config/mitos/languages.toml".source = config/mitos/languages.toml;
+    ".config/mitos/languages.toml".source = config/languages.toml;
     ".config/mitos/runtime/dictionaries/en_AU".source = "${pkgs.hunspellDicts.en_AU}/share/hunspell";
     ".config/zellij/config.kdl".source = config/zellij/config.kdl;
     ".config/herdr/plugins/config/cloudmanic.herdr-plus/worktrees/default.toml".source =
-      config/herdr/herdr-plus/worktrees/default.toml;
+      config/herdr/herdr-plus/worktrees/default.toml;  };
 
-    # # You can also set the file content immediately.
-    # ".gradle/gradle.properties".text = ''
-    #   org.gradle.console=verbose
-    #   org.gradle.daemon.idletimeout=3600000
-    # '';
-  };
-
-  # Home Manager can also manage your environment variables through
-  # 'home.sessionVariables'. These will be explicitly sourced when using a
-  # shell provided by Home Manager. If you don't want to manage your shell
-  # through Home Manager then you have to manually source 'hm-session-vars.sh'
-  # located at either
-  #
-  #  ~/.nix-profile/etc/profile.d/hm-session-vars.sh
-  #
-  # or
-  #
-  #  ~/.local/state/nix/profiles/profile/etc/profile.d/hm-session-vars.sh
-  #
-  # or
-  #
-  #  /etc/profiles/per-user/malcolm/etc/profile.d/hm-session-vars.sh
-  #
   home.sessionVariables = {
     COLORTERM = "truecolor";
   };
@@ -258,7 +131,6 @@ in
     "$HOME/.local/bin"
   ];
 
-  # Let Home Manager install and manage itself.
   services.ssh-agent.enable = true;
 
   programs = {
@@ -275,8 +147,8 @@ in
         Use `!` after the type/scope or a `BREAKING CHANGE:` footer for breaking changes.
         Write the description in the imperative mood, lowercase, no trailing period.
       '';
-      # Same language servers as helix (see config/helix/languages.toml and
-      # editorTools). The spell/grammar checkers (typos-lsp, harper-ls) and
+      # Same language servers as helix and mitos (see config/languages.toml
+      # and editorTools). The spell/grammar checkers (typos-lsp, harper-ls) and
       # zizmor are omitted: they overlap file types and give an agent little
       # navigation value.
       lspServers = {
@@ -461,7 +333,7 @@ in
             {
               key = "prefix+ctrl+g";
               type = "pane";
-              command = "lazygit";
+              command = "gitui";
             }
             # herdr-plus: fuzzy-pick a project template (shown in prefix+?)
             {
@@ -476,6 +348,7 @@ in
     };
 
     home-manager.enable = true;
+    # Profile-specific hosts are added in home.nix and work.nix.
     ssh = {
       enable = true;
       enableDefaultConfig = false;
@@ -512,6 +385,10 @@ in
       };
     };
     bottom.enable = true;
+    eza = {
+      enable = true;
+      git = true;
+    };
     fd.enable = true;
     fish = {
       enable = true;
@@ -584,7 +461,6 @@ in
     helix = {
       enable = true;
       defaultEditor = true;
-      extraPackages = editorTools;
     };
     jjui.enable = true;
     jq.enable = true;

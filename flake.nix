@@ -2,9 +2,7 @@
   description = "Home Manager configuration of malcolm";
 
   inputs = {
-    # Specify the source of Home Manager and Nixpkgs.
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.11";
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -28,50 +26,44 @@
   };
 
   outputs =
-    {
-      nixpkgs,
-      nixpkgs-stable,
-      home-manager,
-      vercel-skills,
-      superpowers-skills,
-      pymc-modeling-skills,
-      mitos,
-      ...
-    }:
+    inputs@{ nixpkgs, home-manager, ... }:
     let
       system = "x86_64-linux";
+      lib = nixpkgs.lib;
+
+      # These Rust builds (aws-lc-sys, zstd-sys) probe system libraries through
+      # pkg-config without declaring them, so add them explicitly.
+      withSysDeps =
+        pkgs: deps: drv:
+        drv.overrideAttrs (old: {
+          nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ pkgs.pkg-config ];
+          buildInputs = (old.buildInputs or [ ]) ++ deps;
+        });
+
+      overlay = final: prev: {
+        mitos = withSysDeps final [ final.aws-lc ] inputs.mitos.packages.${system}.default;
+        zizmor = withSysDeps final [ final.aws-lc ] prev.zizmor;
+        pqrs = withSysDeps final [ final.zstd ] prev.pqrs;
+      };
+
       pkgs = import nixpkgs {
-        system = system;
-        config = {
-          allowUnfree = true;
-        };
+        inherit system;
+        config.allowUnfree = true;
+        overlays = [ overlay ];
       };
-      pkgs-stable = import nixpkgs-stable {
-        system = system;
-        config = {
-          allowUnfree = true;
-        };
-      };
-      # Mitos' Rust dependency on aws-lc-sys opts into the Nixpkgs system
-      # AWS-LC library. Make those build inputs explicit for the release flake.
-      mitosPackage = mitos.packages.${system}.default.overrideAttrs (old: {
-        nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ pkgs.pkg-config ];
-        buildInputs = (old.buildInputs or [ ]) ++ [ pkgs.aws-lc ];
-      });
-      lib = pkgs.lib;
 
       # Each entry: { src = <flake-input>; dir = "path/to/skills/within/repo"; }
       skillSources = {
         "vercel-labs"."skills" = {
-          src = vercel-skills;
+          src = inputs.vercel-skills;
           dir = "skills";
         };
         "awdemos"."opencode-superpowers" = {
-          src = superpowers-skills;
+          src = inputs.superpowers-skills;
           dir = "skills";
         };
         "pymc-labs"."pymc-modeling" = {
-          src = pymc-modeling-skills;
+          src = inputs.pymc-modeling-skills;
           dir = "skills";
         };
       };
@@ -97,50 +89,41 @@
         ) repos
       ) skillSources;
 
-      baseUser = {
-        username = "malcolm";
-        name = "Malcolm Ramsay";
-        home = "/home/malcolm";
-      };
-
+      mkHome =
+        { profile, email }:
+        home-manager.lib.homeManagerConfiguration {
+          inherit pkgs;
+          modules = [
+            ./shared.nix
+            ./${profile}.nix
+            ./skills.nix
+            ./pi.nix
+          ];
+          extraSpecialArgs = {
+            inherit availableSkills profile;
+            user = {
+              username = "malcolm";
+              name = "Malcolm Ramsay";
+              home = "/home/malcolm";
+              inherit email;
+            };
+          };
+        };
     in
     {
       packages.${system} = {
-        mitos = mitosPackage;
-        default = mitosPackage;
+        inherit (pkgs) mitos;
+        default = pkgs.mitos;
       };
 
-      homeConfigurations."home" = home-manager.lib.homeManagerConfiguration {
-        inherit pkgs;
-        modules = [
-          ./shared.nix
-          ./home.nix
-          ./skills.nix
-          ./pi.nix
-        ];
-
-        extraSpecialArgs = {
-          inherit availableSkills pkgs-stable mitosPackage;
-          defaultBrowser = "zen";
+      homeConfigurations = {
+        home = mkHome {
           profile = "home";
-          user = baseUser // { email = "m@malramsay.com"; };
+          email = "m@malramsay.com";
         };
-      };
-      homeConfigurations."work" = home-manager.lib.homeManagerConfiguration {
-        inherit pkgs;
-
-        modules = [
-          ./shared.nix
-          ./work.nix
-          ./skills.nix
-          ./pi.nix
-        ];
-
-        extraSpecialArgs = {
-          inherit availableSkills pkgs-stable mitosPackage;
-          defaultBrowser = "wslview";
+        work = mkHome {
           profile = "work";
-          user = baseUser // { email = "malcolm.ramsay@tiimely.com"; };
+          email = "malcolm.ramsay@tiimely.com";
         };
       };
     };

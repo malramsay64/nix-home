@@ -6,7 +6,7 @@ and to ensure tools (and their configurations) I find useful are documented as p
 
 ## Installation
 
-The [Derminate nix installer](https://github.com/DeterminateSystems/nix-installer) is
+The [Determinate nix installer](https://github.com/DeterminateSystems/nix-installer) is
 the recommended way to install nix on a wide range of systems.
 This is the approach that I have used to set this up initially.
 
@@ -15,11 +15,14 @@ curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix 
   sh -s -- install
 ```
 
-Once nix is installed, getting the environment setup and running can be done with the command
+Once nix is installed, activate the `home` or `work` profile with
 
 ```sh
-  nix run home-manager -- switch --flake github:malramsay64/nix-home#malcolm
+nix run home-manager -- switch --flake github:malramsay64/nix-home#home
 ```
+
+Shared configuration lives in `shared.nix`; each profile's packages, SSH hosts
+and MCP servers live in `home.nix` and `work.nix`.
 
 ## Upgrading
 
@@ -31,11 +34,14 @@ configured one-shot MCP servers' npm/uv caches so they fetch fresh versions when
 next launched. The pinned `pi-subagents` version remains pinned. The `work` profile
 also upgrades Ubuntu packages with `apt`, Windows packages with `winget.exe`, and opens
 the Windows Update settings page (from WSL). Windows Update installation and any
-required restart remain interactive. Failures are reported after the remaining
-upgrade steps have been attempted.
+required restart remain interactive. Finally it removes Home Manager and Nix
+profile generations older than 7 days, garbage-collects the Nix store, and
+prunes the uv and npm caches. Failures are reported after the remaining upgrade
+steps have been attempted.
 
-The command expects this checkout at `~/projects/nix-home` by default. If it is
-elsewhere, set `NIX_HOME_FLAKE` when running it, for example:
+The command looks for this checkout at `~/Projects/nix-home`, then
+`~/projects/nix-home`. If it is elsewhere, set `NIX_HOME_FLAKE` when running it,
+for example:
 
 ```sh
 NIX_HOME_FLAKE="$HOME/src/nix-home" upgrade-everything
