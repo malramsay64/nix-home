@@ -196,7 +196,6 @@ in
       nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ pkg-config ];
       buildInputs = (old.buildInputs or [ ]) ++ [ zstd ];
     }))
-    difftastic
     nixfmt
     mermaid-cli
     prettier
@@ -498,6 +497,15 @@ in
       };
     };
     bat.enable = true;
+    difftastic = {
+      enable = true;
+      # `git diff` uses difftastic; `git difftool` is configured too.
+      git = {
+        enable = true;
+        mode = "both";
+      };
+      jujutsu.enable = true;
+    };
     direnv = {
       enable = true;
       config = {
@@ -519,17 +527,12 @@ in
       '';
     };
     gh.enable = true;
-    delta = {
-      enable = true;
-      enableGitIntegration = true;
-    };
     git = {
       enable = true;
       signing.format = null;
       settings = {
         user.email = user.email;
         user.name = user.name;
-        delta.enable = true;
         alias = {
           lol = "log --graph --decorate --pretty=oneline --abbrev-commit";
           lola = "log --graph --decorate --pretty=oneline --abbrev-commit --all";
@@ -560,6 +563,7 @@ in
         push = {
           autoSetupRemote = true;
         };
+        difftool.prompt = false;
       };
     };
     gitui = {
