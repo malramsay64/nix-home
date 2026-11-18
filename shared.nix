@@ -188,10 +188,8 @@ in
     tree
     just
     mitosWrapped
-    bottom
     dust
     hyperfine
-    jq
     # pqrs's zstd-sys dependency probes system zstd through pkg-config.
     (pqrs.overrideAttrs (old: {
       nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ pkg-config ];
@@ -201,10 +199,8 @@ in
     mermaid-cli
     prettier
     prettier-plugin-jinja-template
-    jjui
     nodejs
     exiftool
-    pandoc
     betterleaks
     prek
 
@@ -515,6 +511,7 @@ in
         };
       };
     };
+    bottom.enable = true;
     fd.enable = true;
     fish = {
       enable = true;
@@ -588,6 +585,8 @@ in
       defaultEditor = true;
       extraPackages = editorTools;
     };
+    jjui.enable = true;
+    jq.enable = true;
     jujutsu = {
       enable = true;
       settings = {
@@ -597,6 +596,11 @@ in
         };
       };
     };
+    mise = {
+      enable = true;
+      enableFishIntegration = true;
+    };
+    pandoc.enable = true;
     ripgrep.enable = true;
     starship = {
       enable = true;
