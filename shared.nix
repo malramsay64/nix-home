@@ -108,6 +108,7 @@ in
 
         upgrade_uv_tools() {
           uv tool upgrade --all
+          uv python upgrade
         }
 
         upgrade_pi_extensions() {
@@ -601,7 +602,22 @@ in
       enable = true;
       enableFishIntegration = true;
     };
-    uv.enable = true;
+    uv = {
+      enable = true;
+      settings = {
+        # Use uv's own interpreters, never the distro's.
+        python-preference = "only-managed";
+        python-downloads = "automatic";
+      };
+      # Latest patch of each supported (not end-of-life) CPython minor, as of
+      # 2026-11; see https://devguide.python.org/versions/. Unpinned entries
+      # are upgraded on every activation, and anything else managed is pruned.
+      python = {
+        versions = [ "3.11" "3.12" "3.13" "3.14" "3.15" ];
+        default = [ "3.15" ]; # provides `python` and `python3` in ~/.local/bin
+        prune = true;
+      };
+    };
     zellij = {
       enable = true;
       enableFishIntegration = false;
