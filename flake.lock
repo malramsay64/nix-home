@@ -79,8 +79,7 @@
         "mitos": "mitos",
         "nixpkgs": "nixpkgs",
         "pymc-modeling-skills": "pymc-modeling-skills",
-        "superpowers-skills": "superpowers-skills",
-        "vercel-skills": "vercel-skills"
+        "superpowers-skills": "superpowers-skills"
       }
     },
     "superpowers-skills": {
@@ -96,22 +95,6 @@
       "original": {
         "owner": "awdemos",
         "repo": "opencode-superpowers",
-        "type": "github"
-      }
-    },
-    "vercel-skills": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1794525922,
-        "narHash": "sha256-ADvbHoiYUSsvXAjEGKwE4cAjnl1Fk3ztr2UthP/dLHM=",
-        "owner": "vercel-labs",
-        "repo": "skills",
-        "rev": "b716f9dc2ba36b6aa8f0080615e5a3a6caeac63b",
-        "type": "github"
-      },
-      "original": {
-        "owner": "vercel-labs",
-        "repo": "skills",
         "type": "github"
       }
     }

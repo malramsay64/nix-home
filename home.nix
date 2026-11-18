@@ -18,10 +18,8 @@ let
   };
 in
 {
-  claude.skills = [
-    availableSkills."vercel-labs"."skills"."find-skills"
-  ]
-  ++ builtins.attrValues availableSkills."awdemos"."opencode-superpowers"
+  claude.skills =
+    builtins.attrValues availableSkills."awdemos"."opencode-superpowers"
   ++ [
     {
       name = "gf-df-trip";

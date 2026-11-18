@@ -398,7 +398,6 @@ in
         if command -q herdr
           herdr completion fish | source
         end
-        set -gx GITHUB_PERSONAL_ACCESS_TOKEN (gh auth token 2>/dev/null)
       '';
     };
     gh.enable = true;

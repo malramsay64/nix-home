@@ -7,10 +7,6 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    vercel-skills = {
-      url = "github:vercel-labs/skills";
-      flake = false;
-    };
     superpowers-skills = {
       url = "github:awdemos/opencode-superpowers";
       flake = false;
@@ -54,10 +50,6 @@
 
       # Each entry: { src = <flake-input>; dir = "path/to/skills/within/repo"; }
       skillSources = {
-        "vercel-labs"."skills" = {
-          src = inputs.vercel-skills;
-          dir = "skills";
-        };
         "awdemos"."opencode-superpowers" = {
           src = inputs.superpowers-skills;
           dir = "skills";
@@ -111,11 +103,6 @@
         };
     in
     {
-      packages.${system} = {
-        inherit (pkgs) mitos;
-        default = pkgs.mitos;
-      };
-
       homeConfigurations = {
         home = mkHome {
           profile = "home";

@@ -5,7 +5,6 @@
     jiratui
     github-copilot-cli
     databricks-cli
-    awscli2
     hadolint
   ];
 

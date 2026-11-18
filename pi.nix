@@ -116,37 +116,16 @@ in
     programs.pi-coding-agent = {
       enable = true;
 
-      # Tools available on PATH to the pi agent itself (bash tool, packages it
-      # installs via `pi packages add`, MCP adapters, etc). Chosen to cover
-      # infrastructure, data science, and backend API workflows.
+      # Extra tools on PATH for the pi agent, beyond what shared.nix already
+      # installs (nodejs, uv, ruff, ty, duckdb, jq, ripgrep, fd, jujutsu).
       extraPackages = with pkgs; [
-        # JS/TS runtime needed for npm: packages pi can install (e.g. MCP
-        # adapters, termdraw) and for backend API dev/debugging.
-        nodejs
         bun
-
-        # Infrastructure / ops
         kubectl
         kubernetes-helm
         terraform
         awscli2
-        jq
         yq-go
         httpie
-
-        # Data science / data engineering
-        uv
-        # ruff/ty on PATH as a fallback for ad-hoc `bash` use outside a
-        # uv-managed project; the pi-lsp servers above run each project's own
-        # pinned versions via `uv run` instead of these.
-        ruff
-        ty
-        duckdb
-        ripgrep
-        fd
-
-        # Version control used by the agent for commits (see context.md).
-        jujutsu
       ];
 
       # Profile-specific provider/model defaults live in home.nix and work.nix.
