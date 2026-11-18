@@ -283,6 +283,82 @@ in
         Use `!` after the type/scope or a `BREAKING CHANGE:` footer for breaking changes.
         Write the description in the imperative mood, lowercase, no trailing period.
       '';
+      # Same language servers as helix (see config/helix/languages.toml and
+      # editorTools). The spell/grammar checkers (typos-lsp, harper-ls) and
+      # zizmor are omitted: they overlap file types and give an agent little
+      # navigation value.
+      lspServers = {
+        nix = {
+          command = "nixd";
+          extensionToLanguage.".nix" = "nix";
+        };
+        bash = {
+          command = "bash-language-server";
+          args = [ "start" ];
+          extensionToLanguage = {
+            ".sh" = "shellscript";
+            ".bash" = "shellscript";
+          };
+        };
+        dockerfile = {
+          command = "docker-langserver";
+          args = [ "--stdio" ];
+          extensionToLanguage.".dockerfile" = "dockerfile";
+        };
+        terraform = {
+          command = "terraform-ls";
+          args = [ "serve" ];
+          extensionToLanguage = {
+            ".tf" = "terraform";
+            ".tfvars" = "terraform-vars";
+          };
+        };
+        toml = {
+          command = "taplo";
+          args = [
+            "lsp"
+            "stdio"
+          ];
+          extensionToLanguage.".toml" = "toml";
+        };
+        yaml = {
+          command = "yaml-language-server";
+          args = [ "--stdio" ];
+          extensionToLanguage = {
+            ".yaml" = "yaml";
+            ".yml" = "yaml";
+          };
+        };
+        markdown = {
+          command = "marksman";
+          args = [ "server" ];
+          extensionToLanguage = {
+            ".md" = "markdown";
+            ".markdown" = "markdown";
+          };
+        };
+        rust = {
+          command = "rust-analyzer";
+          extensionToLanguage.".rs" = "rust";
+        };
+        typst = {
+          command = "tinymist";
+          extensionToLanguage.".typ" = "typst";
+        };
+        csharp = {
+          command = "OmniSharp";
+          args = [ "-lsp" ];
+          extensionToLanguage.".cs" = "csharp";
+        };
+        python = {
+          command = "ty";
+          args = [ "server" ];
+          extensionToLanguage = {
+            ".py" = "python";
+            ".pyi" = "python";
+          };
+        };
+      };
       settings = {
         theme = "auto";
         tui = "fullscreen";
