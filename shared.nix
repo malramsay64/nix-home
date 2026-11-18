@@ -186,7 +186,6 @@ in
     lazyjj
     tree
     just
-    herdr
     mitosWrapped
     bottom
     dust
@@ -229,7 +228,6 @@ in
     ".config/mitos/languages.toml".source = config/mitos/languages.toml;
     ".config/mitos/runtime/dictionaries/en_AU".source = "${pkgs.hunspellDicts.en_AU}/share/hunspell";
     ".config/zellij/config.kdl".source = config/zellij/config.kdl;
-    ".config/herdr/config.toml".source = config/herdr/config.toml;
     ".config/herdr/plugins/config/cloudmanic.herdr-plus/worktrees/default.toml".source =
       config/herdr/herdr-plus/worktrees/default.toml;
 
@@ -387,6 +385,99 @@ in
         hooks.PreToolUse = [ atuinHook ];
         hooks.PostToolUse = [ atuinHook ];
         hooks.PostToolUseFailure = [ atuinHook ];
+      };
+    };
+
+    herdr = {
+      enable = true;
+      settings = {
+        onboarding = false;
+
+        terminal.new_cwd = "follow"; # new panes/tabs open in the current worktree
+
+        ui = {
+          status_indicators = "symbols";
+          agent_panel_sort = "priority"; # blocked/needs-input agents float to the top
+          prompt_new_tab_name = false; # Zellij-like: no name prompt for new tabs
+          pane_borders = "always"; # frame a lone pane too, not just splits
+          tab_bar_right = [
+            { type = "zoom"; }
+            { type = "datetime"; }
+          ];
+          toast.delivery = "system";
+        };
+
+        keys = {
+          prefix = "ctrl+b";
+
+          # Worktrees
+          new_worktree = "prefix+shift+g"; # new branch + checkout + workspace
+          open_worktree = "prefix+shift+o"; # pick an existing checkout
+          remove_worktree = "prefix+alt+d"; # git worktree remove (keeps the branch)
+
+          # Zellij-style direct keys (no prefix)
+          focus_pane_left = [
+            "prefix+h"
+            "alt+h"
+          ];
+          focus_pane_down = [
+            "prefix+j"
+            "alt+j"
+          ];
+          focus_pane_up = [
+            "prefix+k"
+            "alt+k"
+          ];
+          focus_pane_right = [
+            "prefix+l"
+            "alt+l"
+          ];
+          split_vertical = [
+            "prefix+v"
+            "alt+n"
+          ];
+          split_horizontal = [
+            "prefix+d"
+            "prefix+minus"
+          ]; # zellij pane mode: d = down
+          zoom = [
+            "prefix+z"
+            "prefix+f"
+            "alt+f"
+          ]; # zellij pane mode: f = fullscreen
+          next_tab = [
+            "prefix+n"
+            "alt+]"
+          ];
+          previous_tab = [
+            "prefix+p"
+            "alt+["
+          ];
+          next_workspace = "alt+shift+j"; # move between worktrees
+          previous_workspace = "alt+shift+k";
+          resize_pane_left = "alt+shift+h";
+          resize_pane_right = "alt+shift+l";
+          move_tab_previous = "alt+i";
+          move_tab_next = "alt+o";
+          last_pane = "prefix+;";
+
+          indexed.workspaces = "alt"; # alt+1..9 jumps straight to a worktree
+
+          command = [
+            {
+              key = "prefix+ctrl+g";
+              type = "pane";
+              command = "lazygit";
+            }
+            # herdr-plus: fuzzy-pick a project template (shown in prefix+?)
+            {
+              key = "prefix+up";
+              type = "plugin_action";
+              command = "cloudmanic.herdr-plus.projects";
+              description = "herdr-plus: projects";
+            }
+          ];
+        };
       };
     };
 
