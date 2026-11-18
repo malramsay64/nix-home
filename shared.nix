@@ -220,8 +220,6 @@ in
     # # the Nix store. Activating the configuration will then make '~/.screenrc' a
     # # symlink to the Nix store copy.
     # ".screenrc".source = dotfiles/screenrc;
-    ".config/alacritty/alacritty.toml".source = config/alacritty/alacritty.toml;
-    ".config/alacritty/one_dark.toml".source = config/alacritty/one_dark.toml;
     ".config/helix/config.toml".source = config/helix/config.toml;
     ".config/helix/languages.toml".source = config/helix/languages.toml;
     ".config/mitos/config.toml".source = config/mitos/config.toml;
@@ -493,6 +491,11 @@ in
     };
     alacritty = {
       enable = true;
+      theme = "one_dark";
+      settings.font = {
+        normal.family = "Iosevka Term";
+        size = 14;
+      };
     };
     bat.enable = true;
     direnv = {
