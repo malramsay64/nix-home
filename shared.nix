@@ -525,6 +525,7 @@ in
       '';
     };
     gh.enable = true;
+    ghostty.enable = true;
     git = {
       enable = true;
       signing.format = null;
