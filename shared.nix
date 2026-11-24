@@ -74,6 +74,20 @@ let
     ''
     + builtins.readFile ./scripts/upgrade-everything.sh;
   };
+
+  # The hook script `herdr integration install claude` writes, generated at
+  # build time so it tracks the installed herdr version. The installer also
+  # edits settings.json, which is nix-managed, so it runs against a scratch
+  # HOME and only the script is kept; the matching hook entry lives in
+  # programs.claude-code.settings below.
+  herdrClaudeHook =
+    pkgs.runCommand "herdr-claude-hook" { nativeBuildInputs = [ config.programs.herdr.package ]; }
+      ''
+        export HOME="$TMPDIR/home"
+        mkdir -p "$HOME/.claude"
+        herdr integration install claude
+        install -Dm755 "$HOME/.claude/hooks/herdr-agent-state.sh" "$out"
+      '';
 in
 {
   home.username = user.username;
@@ -119,7 +133,9 @@ in
     ".config/mitos/runtime/dictionaries/en_AU".source = "${pkgs.hunspellDicts.en_AU}/share/hunspell";
     ".config/zellij/config.kdl".source = config/zellij/config.kdl;
     ".config/herdr/plugins/config/cloudmanic.herdr-plus/worktrees/default.toml".source =
-      config/herdr/herdr-plus/worktrees/default.toml;  };
+      config/herdr/herdr-plus/worktrees/default.toml;
+    ".claude/hooks/herdr-agent-state.sh".source = herdrClaudeHook;
+  };
 
   home.sessionVariables = {
     COLORTERM = "truecolor";
@@ -230,8 +246,8 @@ in
           commit = "";
           pr = "";
         };
-        # Reports session state to herdr. The script itself is written by
-        # `herdr integration install claude` and lives outside nix.
+        # Reports session state to herdr. The script is linked in via
+        # home.file from herdrClaudeHook.
         hooks.SessionStart = [
           {
             matcher = "^(startup|resume|clear|compact|fork)$";
