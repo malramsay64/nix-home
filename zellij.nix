@@ -34,7 +34,12 @@ let
     pname = "zellij-project-sidebar";
     version = "0.1.0-unstable-2026-03-15";
     src = sidebarSrc;
-    cargoHash = "sha256-eDJw2g7uNvMOCbGQJ+MbaqyQgBUQ4+zlDHyPcOgX57E=";
+    # Upstream targets zellij-tile 0.43, whose plugin protocol no longer
+    # delivers session updates under zellij 0.46 (the sidebar stays empty).
+    # The patch bumps zellij-tile to 0.46 and adapts three changed calls
+    # (Text::new -> Text::from, focus_plugin_pane arity, LayoutInfo::File).
+    cargoPatches = [ ./patches/zellij-project-sidebar-zellij-0.46.patch ];
+    cargoHash = "sha256-cd3Nx6kdxXRR0FFDwMGbRBrtJV3HKQNu0i+VwEdLi9E=";
     CARGO_TARGET_WASM32_WASIP1_RUSTFLAGS = "-C linker=${wasmLd}";
     doCheck = false;
   };
@@ -90,7 +95,7 @@ in
       custom_commands.universal.Z = {
         description = "Zellij (worktree layout)";
         show_help = true;
-        command = ''zellij-worktree "wt-$WORKTREE_NAME" "$WORKTREE_PATH"'';
+        command = ''zellij-worktree "wt-''${REPO_NAME##*/}-$WORKTREE_NAME" "$WORKTREE_PATH"'';
       };
     };
   };
@@ -99,8 +104,9 @@ in
     "zellij/plugins/zellij-project-sidebar.wasm".source =
       "${sidebarPlugin}/bin/zellij-project-sidebar.wasm";
 
-    # Sidebar fixed at 30 columns in every tab, Claude in the main area, a
-    # shell over lazygit on the right, compact bar below. New tabs need their
+    # Two tabs per worktree (dev: ms over a shell with Claude on the right;
+    # servers: two shells), sidebar fixed at 30 columns in every tab, compact
+    # bar below. New tabs need their
     # own template: from default_tab_template, `children` gets no terminal,
     # and since the sidebar marks itself unselectable Zellij closes the tab
     # straight away.
@@ -124,13 +130,23 @@ in
                   plugin location="compact-bar"
               }
           }
-          tab name="main" focus=true {
+          // dev: editor over a shell on the left 70%, Claude on the right 30%.
+          tab name="dev" focus=true {
               pane split_direction="vertical" {
-                  pane size="70%" name="claude" command="claude" focus=true
-                  pane split_direction="horizontal" {
-                      pane name="shell"
-                      pane name="lazygit" command="lazygit"
+                  pane size="70%" split_direction="horizontal" {
+                      pane name="editor" command="ms" focus=true {
+                          args "."
+                      }
+                      pane name="shell" size="30%"
                   }
+                  pane size="30%" name="claude" command="claude"
+              }
+          }
+          // servers: two shells side by side for long-running tasks.
+          tab name="servers" {
+              pane split_direction="vertical" {
+                  pane name="server-1"
+                  pane name="server-2"
               }
           }
       }
