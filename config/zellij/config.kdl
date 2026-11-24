@@ -154,6 +154,25 @@ keybinds clear-defaults=true {
         bind "Alt l" { MoveFocusOrTab "right"; }
         bind "Alt n" { NewPane; }
         bind "Alt o" { MoveTab "right"; }
+        bind "Alt 1" { GoToTab 1; }
+        bind "Alt 2" { GoToTab 2; }
+        bind "Alt 3" { GoToTab 3; }
+        bind "Alt 4" { GoToTab 4; }
+        bind "Alt 5" { GoToTab 5; }
+        bind "Alt 6" { GoToTab 6; }
+        bind "Alt 7" { GoToTab 7; }
+        bind "Alt 8" { GoToTab 8; }
+        bind "Alt 9" { GoToTab 9; }
+        // Focus the project sidebar (zellij-project-sidebar, see zellij.nix).
+        // scan_dir and session_layout must match the layout's plugin config
+        // exactly, or Zellij starts a second, hidden sidebar instead.
+        bind "Alt s" {
+            MessagePlugin "file:~/.config/zellij/plugins/zellij-project-sidebar.wasm" {
+                name "toggle_sidebar"
+                scan_dir "/home/malcolm/Projects"
+                session_layout "/home/malcolm/.config/zellij/layouts/worktree.kdl"
+            }
+        }
     }
     shared_except "locked" "renametab" "renamepane" {
         bind "Ctrl g" { SwitchToMode "locked"; }

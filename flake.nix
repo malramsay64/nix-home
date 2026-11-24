@@ -90,6 +90,7 @@
             ./${profile}.nix
             ./skills.nix
             ./pi.nix
+            ./zellij.nix
           ];
           extraSpecialArgs = {
             inherit availableSkills profile;
