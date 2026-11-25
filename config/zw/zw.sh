@@ -106,11 +106,25 @@ create_detached() {
   for ((i = 0; i < 30; i++)); do
     if session_exists "$name"; then
       dismiss_welcome "$name"
+      release_client "$name"
       return 0
     fi
     sleep 0.5
   done
   die "session $name did not start"
+}
+
+# The throwaway client that built the session would otherwise stay attached
+# (and keep script, a shell and zellij alive) indefinitely. Detach it, and if it
+# lingers anyway, stop it: its parent is the script process we started.
+release_client() {
+  local name=$1 i
+  zellij --session "$name" action detach >/dev/null 2>&1 || true
+  for ((i = 0; i < 10; i++)); do
+    pgrep -f "zellij --session $name --new-session-with-layout" >/dev/null || return 0
+    sleep 0.3
+  done
+  pkill -f "script -qfc stty cols 200 rows 50; zellij --session $name --new-session-with-layout" || true
 }
 
 # Until zellij's one-off desktop setup screen is dismissed, every new session
