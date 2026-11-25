@@ -14,6 +14,10 @@ let
   projects = [
     "${home}/Projects/nix-home"
     "${home}/Projects/kubelab"
+    "${home}/Projects/keyboards"
+    "${home}/Projects/rmk"
+    "${home}/Projects/personal_site"
+    "${home}/Projects/skymap"
   ];
 
   zw = pkgs.writeShellApplication {
