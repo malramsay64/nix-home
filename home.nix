@@ -1,5 +1,11 @@
-{ pkgs, availableSkills, ... }:
+{
+  pkgs,
+  config,
+  availableSkills,
+  ...
+}:
 let
+  home = config.home.homeDirectory;
   trekUrl = "https://trek.malramsay.com/mcp";
 
   # Secrets for MCP servers are injected per-server with `op run` (1Password
@@ -18,6 +24,15 @@ let
   };
 in
 {
+  zw.projects = [
+    "${home}/Projects/nix-home"
+    "${home}/Projects/kubelab"
+    "${home}/Projects/keyboards"
+    "${home}/Projects/rmk"
+    "${home}/Projects/personal_site"
+    "${home}/Projects/skymap"
+  ];
+
   claude.skills =
     builtins.attrValues availableSkills."awdemos"."opencode-superpowers"
   ++ [

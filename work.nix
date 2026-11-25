@@ -1,5 +1,8 @@
-{ pkgs, ... }:
+{ pkgs, config, ... }:
 {
+  # Work repositories go here; set per profile, see zellij.nix.
+  zw.projects = [ "${config.home.homeDirectory}/Projects/nix-home" ];
+
   home.packages = with pkgs; [
     terraform
     jiratui

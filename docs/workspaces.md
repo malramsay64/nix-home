@@ -8,7 +8,7 @@ the same two tabs:
 
 `wt` (worktrunk) does the git side, `zw` ties it to zellij. Worktrees live in
 `~/.worktrees/<repo>/<branch>`. The projects `zw` knows about are listed in
-`zw.projects` in `zellij.nix` (generated to `~/.config/zw/projects`).
+`zw.projects` in `home.nix` / `work.nix` (generated to `~/.config/zw/projects`).
 
 ## Keys
 
@@ -78,7 +78,7 @@ resurrect from the last snapshot (at most a minute old).
 
 **Worktree made with plain `git` or `wt`**: `zw up` picks it up.
 
-**Add a project**: add its path to `zw.projects`, `home-manager switch`, then
+**Add a project**: add its path to `zw.projects` in that profile's file (`home.nix` or `work.nix`), `home-manager switch`, then
 `zw up`.
 
 **Leave everything running**: `Ctrl g o d`. Come back with `zellij`, then

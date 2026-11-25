@@ -3,22 +3,13 @@
 # `zw` (config/zw/zw.sh) ties them to sessions. See docs/workspaces.md.
 {
   pkgs,
+  lib,
   config,
   ...
 }:
 let
   home = config.home.homeDirectory;
   zellij = config.programs.zellij.package;
-
-  # Repositories zw manages worktrees for; worktrees themselves are dynamic.
-  projects = [
-    "${home}/Projects/nix-home"
-    "${home}/Projects/kubelab"
-    "${home}/Projects/keyboards"
-    "${home}/Projects/rmk"
-    "${home}/Projects/personal_site"
-    "${home}/Projects/skymap"
-  ];
 
   zw = pkgs.writeShellApplication {
     name = "zw";
@@ -86,16 +77,26 @@ let
     '';
 in
 {
-  home.packages = [
+  options.zw.projects = lib.mkOption {
+    type = lib.types.listOf lib.types.str;
+    default = [ ];
+    example = [ "/home/me/Projects/app" ];
+    description = ''
+      Repositories zw manages worktree sessions for, set per profile.
+      Worktrees themselves are discovered dynamically.
+    '';
+  };
+
+  config.home.packages = [
     zw
     pkgs.worktrunk
   ];
 
-  xdg.configFile = {
+  config.xdg.configFile = {
     "zellij/layouts/worktree.kdl".text = layout { lazy = false; };
     "zellij/layouts/worktree-lazy.kdl".text = layout { lazy = true; };
 
-    "zw/projects".text = builtins.concatStringsSep "\n" projects + "\n";
+    "zw/projects".text = builtins.concatStringsSep "\n" config.zw.projects + "\n";
     "zw/help.md".source = ./docs/workspaces.md;
 
     "worktrunk/config.toml".text = ''
