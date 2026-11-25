@@ -1,6 +1,6 @@
-# Herdr-style Zellij: one session per git worktree (opened from lazyworktree
-# with `Z`), each started from layouts/worktree.kdl, with a project sidebar in
-# every tab that shows live Claude Code status.
+# Herdr-style workspaces on stock Zellij: one session per git worktree,
+# started from layouts/worktree.kdl. worktrunk (`wt`) manages the worktrees and
+# `zw` (config/zw/zw.sh) ties them to sessions. See docs/workspaces.md.
 {
   pkgs,
   config,
@@ -9,137 +9,66 @@
 let
   home = config.home.homeDirectory;
   zellij = config.programs.zellij.package;
-  wasmLd = "${pkgs.buildPackages.lld}/bin/wasm-ld";
 
-  # The layout every worktree session starts from; also used by the sidebar
-  # when it starts a session for a project.
-  worktreeLayout = "${home}/.config/zellij/layouts/worktree.kdl";
-  # The sidebar's own Super+t "new tab" layout hardcodes this location.
-  sidebarUrl = "file:~/.config/zellij/plugins/zellij-project-sidebar.wasm";
+  # Repositories zw manages worktrees for; worktrees themselves are dynamic.
+  projects = [
+    "${home}/Projects/nix-home"
+    "${home}/Projects/kubelab"
+  ];
 
-  sidebarSrc = pkgs.fetchFromGitHub {
-    owner = "AndrewBeniston";
-    repo = "zellij-project-sidebar";
-    rev = "b62fdcd638f5ed50a974ac082f0044c87f06c658";
-    hash = "sha256-3mQk/kDdaS9hFL/cHpYACQdPEQwUgABf0/X6vkYENe0=";
+  zw = pkgs.writeShellApplication {
+    name = "zw";
+    runtimeInputs = [
+      zellij
+      pkgs.worktrunk
+      pkgs.git
+      pkgs.fzf
+      pkgs.jq
+      pkgs.util-linux # script(1), for creating sessions without a terminal
+      pkgs.gawk
+      pkgs.less
+    ];
+    text = builtins.readFile ./config/zw/zw.sh;
   };
 
-  # No releases are published; the README's install is
-  # `cargo build --target wasm32-wasip1 --release`, done here with the
-  # wasm32-wasip1 cross toolchain from nixpkgs. That toolchain links through
-  # clang, which rejects the lld-style flags rustc passes for wasm, and the
-  # build hook sets the linker env var inline, so link with wasm-ld via
-  # target-only rustflags instead.
-  sidebarPlugin = pkgs.pkgsCross.wasi32.rustPlatform.buildRustPackage {
-    pname = "zellij-project-sidebar";
-    version = "0.1.0-unstable-2026-03-15";
-    src = sidebarSrc;
-    # Upstream targets zellij-tile 0.43, whose plugin protocol no longer
-    # delivers session updates under zellij 0.46 (the sidebar stays empty).
-    # The patch bumps zellij-tile to 0.46 and adapts three changed calls
-    # (Text::new -> Text::from, focus_plugin_pane arity, LayoutInfo::File).
-    cargoPatches = [ ./patches/zellij-project-sidebar-zellij-0.46.patch ];
-    cargoHash = "sha256-cd3Nx6kdxXRR0FFDwMGbRBrtJV3HKQNu0i+VwEdLi9E=";
-    CARGO_TARGET_WASM32_WASIP1_RUSTFLAGS = "-C linker=${wasmLd}";
-    doCheck = false;
-  };
-
-  sidebarPane = ''
-    pane size=30 name="Projects" {
-        plugin location="${sidebarUrl}" {
-            scan_dir "${home}/Projects"
-            session_layout "${worktreeLayout}"
-        }
-    }
-  '';
-
-  # Create or attach to a worktree's session using the worktree layout.
-  # lazyworktree's built-in zellij support builds one tab per window and
-  # can't take a layout file, so `Z` runs this instead.
-  zellijWorktree = pkgs.writeShellApplication {
-    name = "zellij-worktree";
-    runtimeInputs = [ zellij ];
-    text = ''
-      if [ $# -ne 2 ]; then
-        echo "usage: zellij-worktree <session-name> <worktree-path>" >&2
-        exit 2
-      fi
-      # Zellij rejects these in session names; lazyworktree replaces them too.
-      session=$(printf '%s' "$1" | tr '/\\:' '---')
-      dir=$2
-
-      if [ -n "''${ZELLIJ:-}" ]; then
-        # Already inside Zellij: switch this client over, creating the session
-        # from the layout if it isn't running.
-        exec zellij action switch-session "$session" --layout worktree --cwd "$dir"
-      fi
-
-      if zellij list-sessions --short 2>/dev/null | grep -Fxq "$session"; then
-        exec zellij attach "$session"
-      fi
-      cd "$dir"
-      exec zellij --session "$session" --new-session-with-layout worktree
-    '';
-  };
-
-in
-{
-  home.packages = [ zellijWorktree ];
-
-  programs.lazygit.enable = true;
-
-  programs.lazyworktree = {
-    enable = true;
-    settings = {
-      session_prefix = "wt-";
-      custom_commands.universal.Z = {
-        description = "Zellij (worktree layout)";
-        show_help = true;
-        command = ''zellij-worktree "wt-''${REPO_NAME##*/}-$WORKTREE_NAME" "$WORKTREE_PATH"'';
-      };
-    };
-  };
-
-  xdg.configFile = {
-    "zellij/plugins/zellij-project-sidebar.wasm".source =
-      "${sidebarPlugin}/bin/zellij-project-sidebar.wasm";
-
-    # Two tabs per worktree (dev: ms over a shell with Claude on the right;
-    # servers: two shells), sidebar fixed at 30 columns in every tab, compact
-    # bar below. New tabs need their
-    # own template: from default_tab_template, `children` gets no terminal,
-    # and since the sidebar marks itself unselectable Zellij closes the tab
-    # straight away.
-    "zellij/layouts/worktree.kdl".text = ''
+  # `lazy` panes wait for Enter before starting, so recreating a session for
+  # every worktree after a reboot doesn't launch an editor and a Claude each.
+  layout =
+    { lazy }:
+    let
+      suspended = if lazy then "\n                    start_suspended true" else "";
+      claudeBody = if lazy then " {\n                    start_suspended true\n                  }" else "";
+    in
+    ''
       layout {
           default_tab_template {
-              pane split_direction="vertical" {
-                  ${sidebarPane}
-                  children
-              }
               pane size=1 borderless=true {
-                  plugin location="compact-bar"
+                  plugin location="tab-bar"
+              }
+              children
+              pane size=1 borderless=true {
+                  plugin location="status-bar"
               }
           }
           new_tab_template {
-              pane split_direction="vertical" {
-                  ${sidebarPane}
-                  pane
-              }
               pane size=1 borderless=true {
-                  plugin location="compact-bar"
+                  plugin location="tab-bar"
+              }
+              pane
+              pane size=1 borderless=true {
+                  plugin location="status-bar"
               }
           }
           // dev: editor over a shell on the left 70%, Claude on the right 30%.
           tab name="dev" focus=true {
               pane split_direction="vertical" {
                   pane size="70%" split_direction="horizontal" {
-                      pane name="editor" command="ms" focus=true {
-                          args "."
+                      pane name="editor" command="ms" size="65%" focus=true {
+                          args "."${suspended}
                       }
-                      pane name="shell" size="30%"
+                      pane name="shell" size="35%"
                   }
-                  pane size="30%" name="claude" command="claude"
+                  pane name="claude" command="claude" size="30%"${claudeBody}
               }
           }
           // servers: two shells side by side for long-running tasks.
@@ -151,29 +80,25 @@ in
           }
       }
     '';
-  };
+in
+{
+  home.packages = [
+    zw
+    pkgs.worktrunk
+  ];
 
-  # Live AI status in the sidebar (README "Setting up Claude Code hooks").
-  # The script exits immediately outside Zellij.
-  home.file.".claude/hooks/sidebar-status.sh".source = "${sidebarSrc}/scripts/sidebar-status.sh";
-  programs.claude-code.settings.hooks =
-    let
-      sidebarHook = [
-        {
-          hooks = [
-            {
-              type = "command";
-              command = "$HOME/.claude/hooks/sidebar-status.sh";
-              async = true;
-            }
-          ];
-        }
-      ];
-    in
-    {
-      PostToolUse = sidebarHook;
-      Stop = sidebarHook;
-      Notification = sidebarHook;
-      SessionStart = sidebarHook;
-    };
+  xdg.configFile = {
+    "zellij/layouts/worktree.kdl".text = layout { lazy = false; };
+    "zellij/layouts/worktree-lazy.kdl".text = layout { lazy = true; };
+
+    "zw/projects".text = builtins.concatStringsSep "\n" projects + "\n";
+    "zw/help.md".source = ./docs/workspaces.md;
+
+    "worktrunk/config.toml".text = ''
+      worktree-path = "~/.worktrees/{{ repo }}/{{ branch | sanitize }}"
+
+      # A plain `wt remove` must not leave an orphan session behind.
+      post-remove = "zellij delete-session --force '{{ repo }}.{{ branch | sanitize }}' >/dev/null 2>&1 || true"
+    '';
+  };
 }

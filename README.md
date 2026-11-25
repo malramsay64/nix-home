@@ -24,6 +24,11 @@ nix run home-manager -- switch --flake github:malramsay64/nix-home#home
 Shared configuration lives in `shared.nix`; each profile's packages, SSH hosts
 and MCP servers live in `home.nix` and `work.nix`.
 
+## Worktree workspaces
+
+One Zellij session per git worktree, managed with `zw` and worktrunk (`wt`).
+See [docs/workspaces.md](docs/workspaces.md) for the keys and flight rules.
+
 ## Upgrading
 
 Run `upgrade-everything` to update the tools and activate the current Home Manager

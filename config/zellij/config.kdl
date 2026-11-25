@@ -119,6 +119,54 @@ keybinds clear-defaults=true {
             }
             SwitchToMode "locked"
         }
+        bind "n" {
+            Run "zw" "new" {
+                floating true
+                close_on_exit true
+                name "zw new"
+            }
+            SwitchToMode "locked"
+        }
+        bind "x" {
+            Run "zw" "rm" {
+                floating true
+                close_on_exit true
+                name "zw rm"
+            }
+            SwitchToMode "locked"
+        }
+        bind "g" {
+            Run "zw" "merge" {
+                floating true
+                close_on_exit true
+                name "zw merge"
+            }
+            SwitchToMode "locked"
+        }
+        bind "i" {
+            Run "zw" "status" {
+                floating true
+                close_on_exit true
+                name "zw status"
+            }
+            SwitchToMode "locked"
+        }
+        bind "u" {
+            Run "zw" "up" {
+                floating true
+                close_on_exit true
+                name "zw up"
+            }
+            SwitchToMode "locked"
+        }
+        bind "h" {
+            Run "zw" "help" {
+                floating true
+                close_on_exit true
+                name "zw help"
+            }
+            SwitchToMode "locked"
+        }
         bind "d" { Detach; }
         bind "o" { SwitchToMode "normal"; }
         bind "p" {
@@ -163,14 +211,20 @@ keybinds clear-defaults=true {
         bind "Alt 7" { GoToTab 7; }
         bind "Alt 8" { GoToTab 8; }
         bind "Alt 9" { GoToTab 9; }
-        // Focus the project sidebar (zellij-project-sidebar, see zellij.nix).
-        // scan_dir and session_layout must match the layout's plugin config
-        // exactly, or Zellij starts a second, hidden sidebar instead.
-        bind "Alt s" {
-            MessagePlugin "file:~/.config/zellij/plugins/zellij-project-sidebar.wasm" {
-                name "toggle_sidebar"
-                scan_dir "/home/malcolm/Projects"
-                session_layout "/home/malcolm/.config/zellij/layouts/worktree.kdl"
+        // Worktree workspace (see docs/workspaces.md).
+        bind "Alt w" {
+            LaunchOrFocusPlugin "session-manager" {
+                floating true
+                move_to_focused_tab true
+            }
+        }
+        bind "Alt p" { GoToPreviousSession; }
+        bind "Alt a" { GoToNextAttention; }
+        bind "Alt g" {
+            Run "gitui" {
+                floating true
+                close_on_exit true
+                name "gitui"
             }
         }
     }
@@ -422,7 +476,7 @@ attach_to_session true
  
 // How often in seconds sessions are serialized
 // 
-// serialization_interval 10000
+serialization_interval 60
  
 // Enable or disable writing of session metadata to disk (if disabled, other sessions might not know
 // metadata info on this session)
