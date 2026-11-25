@@ -77,6 +77,10 @@ pick_project() {
 
 # branch<TAB>path<TAB>main|""<TAB>dirty|clean for every worktree of a repo.
 worktrees_of() {
+  if ! git -C "$1" rev-parse --git-dir >/dev/null 2>&1; then
+    echo "zw: skipping $1 (not a git repository)" >&2
+    return 0
+  fi
   wt -C "$1" list --format json | jq -r '
     .items[]
     | select(.worktree != null and (.worktree.prunable // false) == false)
