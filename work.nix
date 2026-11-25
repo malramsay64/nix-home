@@ -1,7 +1,14 @@
 { pkgs, config, ... }:
 {
   # Work repositories go here; set per profile, see zellij.nix.
-  zw.projects = [ "${config.home.homeDirectory}/Projects/nix-home" ];
+  zw.projects = map (name: "${config.home.homeDirectory}/projects/${name}") [
+    "analytics-core"
+    "data-science"
+    "jira-ui"
+    "nix-home"
+    "tiimely-notes"
+    "tf-service"
+  ];
 
   home.packages = with pkgs; [
     terraform
