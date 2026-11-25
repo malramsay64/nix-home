@@ -100,10 +100,22 @@ create_detached() {
       >/dev/null 2>&1 &
   )
   for ((i = 0; i < 30; i++)); do
-    session_exists "$name" && return 0
+    if session_exists "$name"; then
+      dismiss_welcome "$name"
+      return 0
+    fi
     sleep 0.5
   done
   die "session $name did not start"
+}
+
+# Until zellij's one-off desktop setup screen is dismissed, every new session
+# opens it as a floating pane. Close it so `zw up` doesn't leave one per session.
+dismiss_welcome() {
+  local id
+  sleep 1
+  id=$(zellij --session "$1" action list-panes 2>/dev/null | awk '/Welcome to Zellij/ {print $1; exit}')
+  [[ -z $id ]] || zellij --session "$1" action close-pane --pane-id "$id" >/dev/null 2>&1 || true
 }
 
 # Go to a worktree's session, creating it from the full layout if needed.
