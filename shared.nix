@@ -162,6 +162,12 @@ in
         Types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert.
         Use `!` after the type/scope or a `BREAKING CHANGE:` footer for breaking changes.
         Write the description in the imperative mood, lowercase, no trailing period.
+
+        # Worktrees
+
+        Never create git worktrees yourself (no EnterWorktree, `git worktree add`,
+        or `isolation: "worktree"` on subagents). If isolation is needed, stop and
+        ask the user to create one externally, then work in the checkout they give you.
       '';
       # Same language servers as helix and mitos (see config/languages.toml
       # and editorTools). The spell/grammar checkers (typos-lsp, harper-ls) and
@@ -246,6 +252,11 @@ in
           commit = "";
           pr = "";
         };
+        # Worktrees are created externally, never by Claude itself: deny the
+        # tool, and stop background sessions being forced into one before they
+        # may edit.
+        permissions.deny = [ "EnterWorktree" ];
+        worktree.bgIsolation = "none";
         # Reports session state to herdr. The script is linked in via
         # home.file from herdrClaudeHook.
         hooks.SessionStart = [
