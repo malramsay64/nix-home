@@ -68,6 +68,8 @@ in
         '')
         [
           "uvx"
+          "--python"
+          "3.14"
           "ha-mcp@latest"
         ]
       // {
