@@ -32,11 +32,10 @@ in
     "${home}/Projects/rmk"
     "${home}/Projects/personal_site"
     "${home}/Projects/skymap"
+    "${home}/Projects/ha-automations"
   ];
 
-  claude.skills =
-    builtins.attrValues availableSkills."awdemos"."opencode-superpowers"
-  ++ [
+  claude.skills = builtins.attrValues availableSkills."awdemos"."opencode-superpowers" ++ [
     {
       name = "gf-df-trip";
       path = ./pi/skills/gf-df-trip;
