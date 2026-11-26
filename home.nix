@@ -27,6 +27,7 @@ in
   zw.projects = [
     "${home}/Projects/nix-home"
     "${home}/Projects/kubelab"
+    "${home}/Projects/jira-ui"
     "${home}/Projects/keyboards"
     "${home}/Projects/rmk"
     "${home}/Projects/personal_site"
