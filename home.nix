@@ -55,9 +55,44 @@ in
 
   # Delivered by home-manager as a generated personal plugin, so it lives
   # alongside (not inside) the mutable ~/.claude.json.
-  programs.claude-code.mcpServers.trek = {
-    type = "http";
-    url = trekUrl;
+  programs.claude-code.mcpServers = {
+    trek = {
+      type = "http";
+      url = trekUrl;
+    };
+    # https://github.com/homeassistant-ai/ha-mcp
+    homeassistant =
+      opRun
+        (pkgs.writeText "homeassistant-claude-mcp.env" ''
+          HOMEASSISTANT_TOKEN="op://Homelab/Home Assistant/mcp-token"
+        '')
+        [
+          "uvx"
+          "ha-mcp@latest"
+        ]
+      // {
+        env = {
+          HOMEASSISTANT_URL = "https://homeassistant.malramsay.com";
+          # ha-mcp has no read-only switch for stdio. Tool search hides the
+          # full catalogue behind read/write/delete proxy tools, and the
+          # write and delete proxies are denied below.
+          ENABLE_TOOL_SEARCH = "true";
+        };
+      };
+  };
+
+  # Read-only Home Assistant access: only search and the read proxy are
+  # permitted. The plugin prefix is the one home-manager's generated plugin
+  # gives trek (mcp__plugin_hm_trek__*).
+  programs.claude-code.settings.permissions = {
+    allow = [
+      "mcp__plugin_hm_homeassistant__ha_search_tools"
+      "mcp__plugin_hm_homeassistant__ha_call_read_tool"
+    ];
+    deny = [
+      "mcp__plugin_hm_homeassistant__ha_call_write_tool"
+      "mcp__plugin_hm_homeassistant__ha_call_delete_tool"
+    ];
   };
 
   pi.mcpServers = {
