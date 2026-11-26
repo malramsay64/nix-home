@@ -93,6 +93,46 @@ worktrees_of() {
     | @tsv'
 }
 
+# Same columns as worktrees_of, straight from git: no dirty check, so the
+# last column is always "clean". `wt list` walks history and is slow on big repos.
+worktrees_fast() {
+  if ! git -C "$1" rev-parse --git-dir >/dev/null 2>&1; then
+    echo "zw: skipping $1 (not a git repository)" >&2
+    return 0
+  fi
+  git -C "$1" worktree list --porcelain | awk -v OFS='\t' '
+    function flush() { if (path != "" && !prunable && !bare) print (branch == "" ? "(detached)" : branch), path, (n == 1 ? "main" : ""), "clean"; path = branch = ""; prunable = bare = 0 }
+    /^worktree / { flush(); n++; path = substr($0, 10) }
+    /^branch /   { branch = $2; sub("^refs/heads/", "", branch) }
+    /^prunable/  { prunable = 1 }
+    /^bare/      { bare = 1 }
+    END { flush() }'
+}
+
+# repo<TAB>branch<TAB>path<TAB>main|""<TAB>dirty|clean for every worktree of
+# every project. Projects are queried in parallel,
+# output keeps project order.
+all_worktrees() {
+  local tmp repo i=0
+  tmp=$(mktemp -d)
+  while IFS= read -r repo; do
+    if [[ ! -d $repo ]]; then
+      echo "zw: skipping $repo (missing)" >&2
+      continue
+    fi
+    worktrees_fast "$repo" | awk -F'\t' -v OFS='\t' -v r="$repo" '{print r, $0}' >"$tmp/$i" &
+    i=$((i + 1))
+  done < <(project_list)
+  wait
+  for ((repo = 0; repo < i; repo++)); do cat "$tmp/$repo"; done
+  rm -rf "$tmp"
+}
+
+# True if $1 is in the newline-separated session list $2 (fetched once).
+in_sessions() {
+  [[ $'\n'$2$'\n' == *$'\n'$1$'\n'* ]]
+}
+
 # Create a session without attaching: zellij only builds a layout for a
 # connected client, so run one in a throwaway pty and let it hang up.
 create_detached() {
@@ -114,17 +154,11 @@ create_detached() {
   die "session $name did not start"
 }
 
-# The throwaway client that built the session would otherwise stay attached
-# (and keep script, a shell and zellij alive) indefinitely. Detach it, and if it
-# lingers anyway, stop it: its parent is the script process we started.
+# The throwaway client that built the session must not stay attached. Detach it;
+# the script wrapper then exits by itself when its `sleep 6` input ends, so
+# there is nothing to wait for.
 release_client() {
-  local name=$1 i
-  zellij --session "$name" action detach >/dev/null 2>&1 || true
-  for ((i = 0; i < 10; i++)); do
-    pgrep -f "zellij --session $name --new-session-with-layout" >/dev/null || return 0
-    sleep 0.3
-  done
-  pkill -f "script -qfc stty cols 200 rows 50; zellij --session $name --new-session-with-layout" || true
+  zellij --session "$1" action detach >/dev/null 2>&1 || true
 }
 
 # Until zellij's one-off desktop setup screen is dismissed, every new session
@@ -182,16 +216,14 @@ cmd_new() {
 
 # Pick any worktree of any project and go to its session.
 cmd_open() {
-  local repo line branch path name state rows="" choice
-  while IFS= read -r repo; do
-    [[ -d $repo ]] || continue
-    while IFS=$'\t' read -r branch path _ _; do
-      name=$(session_name "$repo" "$branch")
-      state=closed
-      session_exists "$name" && state=open
-      rows+="$name"$'\t'"$state"$'\t'"$path"$'\n'
-    done < <(worktrees_of "$repo")
-  done < <(project_list)
+  local repo line branch path name state rows="" choice sessions
+  sessions=$(zellij list-sessions --short 2>/dev/null)
+  while IFS=$'\t' read -r repo branch path _ _; do
+    name=$(session_name "$repo" "$branch")
+    state=closed
+    in_sessions "$name" "$sessions" && state=open
+    rows+="$name"$'\t'"$state"$'\t'"$path"$'\n'
+  done < <(all_worktrees)
   [[ -n $rows ]] || die "no worktrees found"
   choice=$(printf '%s' "$rows" | column -t -s $'\t' | fzf --prompt="worktree> " --height=40% --reverse) \
     || return 0
@@ -201,20 +233,24 @@ cmd_open() {
 
 # Every worktree of every project gets a session; existing ones are left alone.
 cmd_up() {
-  local repo branch path name made=0
-  while IFS= read -r repo; do
-    [[ -d $repo ]] || { echo "skip $repo (missing)"; continue; }
-    while IFS=$'\t' read -r branch path _ _; do
-      name=$(session_name "$repo" "$branch")
-      if session_exists "$name"; then
-        continue
-      fi
-      echo "creating $name"
-      create_detached "$name" "$path" "$(layout_arg worktree-lazy)"
-      made=$((made + 1))
-    done < <(worktrees_of "$repo")
-  done < <(project_list)
-  echo "$made session(s) created"
+  local repo branch path name sessions todo=() jobs_running=0 max_jobs=4 t
+  sessions=$(zellij list-sessions --short 2>/dev/null)
+  while IFS=$'\t' read -r repo branch path _ _; do
+    name=$(session_name "$repo" "$branch")
+    in_sessions "$name" "$sessions" && continue
+    todo+=("$name"$'\t'"$path")
+  done < <(all_worktrees)
+  # Sessions are independent, so build a few at a time.
+  for t in "${todo[@]}"; do
+    echo "creating ${t%%$'\t'*}"
+    create_detached "${t%%$'\t'*}" "${t##*$'\t'}" "$(layout_arg worktree-lazy)" &
+    if ((++jobs_running >= max_jobs)); then
+      wait -n || true
+      jobs_running=$((jobs_running - 1))
+    fi
+  done
+  wait
+  echo "${#todo[@]} session(s) created"
 }
 
 cmd_rm() {
